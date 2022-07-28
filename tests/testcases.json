@@ -1,0 +1,306 @@
+[
+		{
+			"index": 0,
+			"name": "token_transfer",
+			"blob": "0a05746f6b656e12087472616e73666572180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd8324d0a08000000020000000110ffffffffffffffffff011a1400b1182b317a82e4b9c4a54119ced29f19b496de22207765206861766520736f6d6520696e666f726d6174696f6e2069732068657265",
+			"output": [
+				"0 | module : token",
+				"1 | command : transfer",
+				"2 | fee : 12345678910",
+				"3 | tokenID : 0000000200000001",
+				"4 | amount : 18446744073709551615",
+				"5 | accountInitializationFee : 5000000",
+				"6 | recipientAddress : 00b1182b317a82e4b9c4a54119ced29f19b496de"
+			],
+			"output_expert": [
+				"0 | module : token",
+				"1 | command : transfer",
+				"2 | fee : 12345678910",
+				"3 | nonce : 2",
+				"4 | tokenID : 0000000200000001",
+				"5 | amount : 18446744073709551615",
+				"6 | recipientAddress : 00b1182b317a82e4b9c4a54119ced29f19b496de",
+				"7 | accountInitializationFee : 5000000",
+				"8 | data : we have some information is here"
+			],
+			"signature": "f8bfd5bc0c0f0efc7cbb550959301dd629002dda901db04b3371a14c7e6edcd40c14662c5bee19d79afeb16e5426a04c10b3a6d35f1b07f0963442938b9fcf0f"
+		},
+		{
+			"index": 1,
+			"name": "token_crossChainTransfer",
+			"blob": "0a05746f6b656e121263726f7373436861696e5472616e736665721863208591ec8ff7232a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd832580a08000000020000000110ffffffffffffffffff011a0400000002221400b1182b317a82e4b9c4a54119ced29f19b496de2a207765206861766520736f6d6520696e666f726d6174696f6e20697320686572653080e1eb17",
+			"output": [
+				"0 | module : token",
+				"1 | command : crossChainTransfer",
+				"2 | fee : 1234567891077",
+				"3 | tokenID : 0000000200000001",
+				"4 | amount : 18446744073709551615",
+				"5 | recipientAddress : 00b1182b317a82e4b9c4a54119ced29f19b496de",
+				"6 | escrowInitializationFee : 5000000",
+				"7 | receivingChainID : 00000002"
+			],
+			"output_expert": [
+				"0 | module : token",
+				"1 | command : crossChainTransfer",
+				"2 | fee : 1234567891077",
+				"3 | tokenID : 0000000200000001",
+				"4 | amount : 18446744073709551615",
+				"5 | recipientAddress : 00b1182b317a82e4b9c4a54119ced29f19b496de",
+				"6 | receivingChainID : 00000002",
+				"7 | messageFee : 50000000",
+				"8 | escrowInitializationFee : 5000000",
+				"9 | data : we have some information is here"
+			],
+			"signature": "e461e3e17d84588108ff626c56464c4cad979e63e91d1f904bb3eeca6611d9b0462ee56731f705408a7689729b3698617c1c7b1983485858d385706d4859e101"
+		},
+		{
+			"index": 2,
+			"name": "auth_registerMultisignatureGroup",
+			"blob": "0a0461757468121b72656769737465724d756c74697369676e617475726547726f7570180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd8326808031220fe89ca03b79c10fdc856ab63c8375126fb3830f076afaea4b9143b2eb032a9e21a20c679643a14b43db9065981da829d239b916279e92fa0168e20bc0a735f9fd8f21a209b101fa1fe967f26708cdc63d81e8114500eb7ef7d5ec01219d08ead773cd60f",
+			"output": [
+				"0 | module : auth",
+				"1 | command : registerMultisignatureGroup",
+				"2 | fee : 12345678910",
+				"3 | numberOfSignatures : 3",
+				"4 | mandatoryKeys : fe89ca03b79c10fdc856ab63c8375126fb3830f076afaea4b9143b2eb032a9e2",
+				"5 | optionalKeys : c679643a14b43db9065981da829d239b916279e92fa0168e20bc0a735f9fd8f2,9b101fa1fe967f26708cdc63d81e8114500eb7ef7d5ec01219d08ead773cd60f"
+			],
+			"output_expert": [
+				"0 | module : auth",
+				"1 | command : registerMultisignatureGroup",
+				"2 | fee : 12345678910",
+				"3 | numberOfSignatures : 3",
+				"4 | mandatoryKeys : fe89ca03b79c10fdc856ab63c8375126fb3830f076afaea4b9143b2eb032a9e2",
+				"5 | optionalKeys : c679643a14b43db9065981da829d239b916279e92fa0168e20bc0a735f9fd8f2,9b101fa1fe967f26708cdc63d81e8114500eb7ef7d5ec01219d08ead773cd60f",
+				"6 | signatures : 5fca407faf4adbb8958aa9cc91a255649419c5aa58e02e4515b42934edd025c9ac40de8fdbba0d2cd34cb871f15f4a85489594db8b735b01732a15740ba78f0a,9448f966f81d995ed50b359ebaa959e07bcf47d44386b993e14837ef625c0f8d4befd53cb7a0add31e57a88ab4421f30e8ed0489c92db15c144bf07d0c4a060c,f3de8ea503e2296ffb27382ea60e8fa4131d53a06bc050fbe5b1627f09011b6c489eaf76ce0f9d21831d832496a60d49fb2efcc560f2aac0275eb3b4876b3f08"
+			],
+			"signature": "814b9b630676ac495c00b6a273d666023fc7b39ec11853b666fa764e93803cd7dc8ceec401593bb84c26bc742bc50644f47b014ceee358ba688ca619c5aab701"
+		},
+		{
+			"index": 3,
+			"name": "dpos_registerDelegate",
+			"blob": "0a0464706f731210726567697374657244656c6567617465180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd83282010a0a64656c65676174655f311220fe89ca03b79c10fdc856ab63c8375126fb3830f076afaea4b9143b2eb032a9e21a30b3580baa0e11ea8eec105087fec67bcf459100ac5e5c5996332d0ef4787055531e69b9efc489aabf86541fb0a105df7522202fa181a001d0e76e059b05a08717f32dfb3c6aaf6f6033a0c058001034aebd6c",
+			"output": [
+				"0 | module : dpos",
+				"1 | command : registerDelegate",
+				"2 | fee : 12345678910",
+				"3 | name : delegate_1"
+			],
+			"output_expert": [
+				"0 | module : dpos",
+				"1 | command : registerDelegate",
+				"2 | fee : 12345678910",
+				"3 | name : delegate_1",
+				"4 | generatorKey : fe89ca03b79c10fdc856ab63c8375126fb3830f076afaea4b9143b2eb032a9e2",
+				"5 | blsKey : b3580baa0e11ea8eec105087fec67bcf459100ac5e5c5996332d0ef4787055531e69b9efc489aabf86541fb0a105df75",
+				"6 | proofOfPossession : 2fa181a001d0e76e059b05a08717f32dfb3c6aaf6f6033a0c058001034aebd6c"
+			],
+			"signature": "d3ec27eef6126485f288b19ab7f4e382a4fbdac8a74be146c436a1458ce1917fca921c84318793d5be86fac8d89e7860b4d465c766d499f184a45c4614ec2d0d"
+		},
+		{
+			"index": 4,
+			"name": "dpos_voteDelegate",
+			"blob": "0a0464706f73120c766f746544656c6567617465180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd8323e0a1d0a1400b1182b317a82e4b9c4a54119ced29f19b496de108090cad2c60e0a1d0a1455b5429d1c1890adfd20fe398d1996458006d5c41080d0dbc3f402",
+			"output": [
+				"0 | module : dpos",
+				"1 | command : voteDelegate",
+				"2 | fee : 12345678910",
+				"3 | votes : [object Object],[object Object]"
+			],
+			"output_expert": [
+				"0 | module : dpos",
+				"1 | command : voteDelegate",
+				"2 | fee : 12345678910",
+				"3 | votes : [object Object],[object Object]"
+			],
+			"signature": "b276ebf53ecf62fd5f0d70db1377a5ab06cfcebd66d9d67f35dcaf0fce05d7fefc5c13bb0480409c6f9e1d619135f861b5e7013d72313440deb51582f2f8090c"
+		},
+		{
+			"index": 5,
+			"name": "dpos_unlock",
+			"blob": "0a0464706f731206756e6c6f636b180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd83200",
+			"output": ["0 | module : dpos", "1 | command : unlock", "2 | fee : 12345678910"],
+			"output_expert": ["0 | module : dpos", "1 | command : unlock", "2 | fee : 12345678910"],
+			"signature": "2e45044f190879820d4105c966dc188c38d6c0859f67f8c803ed3e1f014f6c642c15ae718251d2c38f5f399bd408311016d94f5de953205ae454cb27f7a7090e"
+		},
+		{
+			"index": 6,
+			"name": "dpos_reportDelegateMisbehavior",
+			"blob": "0a0464706f7312197265706f727444656c65676174654d69736265686176696f72180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd832bf030add0108011085f6b7f60518c3faf3052220ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad2a20a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3322068a751863fe73b8ede8d832be628ff680d617fa15c74d00142f9025d5f37dd50388088debe014220d59386e0ae435e292fbe0ebcdb954b75ed5fb3922091277cb19f798fc5d507184a408331b5123cac056e2ec8361c56e642db0ca0e13abe33696d23d4d00ad6de844919296e87abe8e172f67fd882b4c0b1c1804b7d9075ecf975cf2631d8d7efef0c12dc01080310ecf8b7f60518b9ff362220e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b8552a20e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b8553220acc56344dea609e80cf5d4165e46917104fe701927847fc2a5d40e37574b2b38388088debe014220eaaf9d4c65cb501c811ef812847a55513181474d734ead1b95b7e1e5b574d2234a401e65032943af975c3cdef94b1fce639645bddb29265321e0277a0f48143ef7f6f6daa1046234a09cc593969ff04d8d082edd15a4a9b90a7b8865fcd9dac44300",
+			"output": [
+				"0 | module : dpos",
+				"1 | command : reportDelegateMisbehavior",
+				"2 | fee : 12345678910"
+			],
+			"output_expert": [
+				"0 | module : dpos",
+				"1 | command : reportDelegateMisbehavior",
+				"2 | fee : 12345678910"
+			],
+			"signature": "38b9929bf076ca89d8c6af8d0861f3a4f799eafb410f86c352604b0a12c240d6a90ed46329f3a7bc392229f8268a681a9eb1463dcc097f8f5f2f71ee3110ec07"
+		},
+		{
+			"index": 7,
+			"name": "interoperability_sidechainCCUpdate",
+			"blob": "0a10696e7465726f7065726162696c697479121173696465636861696e4343557064617465180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd832e20412dc01080310ecf8b7f60518b9ff362220e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b8552a20e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b8553220acc56344dea609e80cf5d4165e46917104fe701927847fc2a5d40e37574b2b38388088debe014220eaaf9d4c65cb501c811ef812847a55513181474d734ead1b95b7e1e5b574d2234a401e65032943af975c3cdef94b1fce639645bddb29265321e0277a0f48143ef7f6f6daa1046234a09cc593969ff04d8d082edd15a4a9b90a7b8865fcd9dac443001a340a30b3580baa0e11ea8eec105087fec67bcf459100ac5e5c5996332d0ef4787055531e69b9efc489aabf86541fb0a105df7510141a340a30ab901181753fade4eab214027f4bdc5fa0e7e54c27dc2de4602f54b9228077ec5ffa6e751e07eb7bb0f1cee654ca3c4e102820422a92020a20b332bc36bc17dcc6bc22149eac93c7b85dfc02cbb3d72ea0dccaf1b346790ab90a32593febebb7262f9ff5195329d36768e6143ecf85dd3f41f3509b52a70c9da68fe0ced7e34d515055504b40640fbf55a87b180a289be9c7a546528407a0510d4b004db629b6180433f6f56a36e87c64b0d76f689602bf66c6d3e6759d1268081412207eb6ca85aa67f660876eddf786683ba89bdbb9abfe9a0d38e05e057207f35b711220ecad1b56984960d3c85358f50321fdfb81a0e160180c1c56c514f48b3f67fa56122073f75c695ca253c1638b7cf4a1388732463350013edacdf5d04f7e95497045d11a260a0200011220289af1f9953c5cb5c5e704a307ffa74265e1db819368bec716bda12c66416ca8",
+			"output": [
+				"0 | module : interoperability",
+				"1 | command : sidechainCCUpdate",
+				"2 | fee : 12345678910",
+				"3 | sidechainID : 00000002"
+			],
+			"output_expert": [
+				"0 | module : interoperability",
+				"1 | command : sidechainCCUpdate",
+				"2 | fee : 12345678910",
+				"3 | sidechainID : 00000002"
+			],
+			"signature": "e78481d07c9fc6f871ab3d4c8cf2d551d8fef463caa9df4f3bd09b13da1282f27047a8f2de39ba0b1f99b37acbeaad0377175b9d42e819590f19a062babb2903"
+		},
+		{
+			"index": 8,
+			"name": "interoperability_mainchainRegistration",
+			"blob": "0a10696e7465726f7065726162696c69747912156d61696e636861696e526567697374726174696f6e180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd832c3010a04000300011208736964656b69636b1a340a30b3580baa0e11ea8eec105087fec67bcf459100ac5e5c5996332d0ef4787055531e69b9efc489aabf86541fb0a105df7510141a340a30ab901181753fade4eab214027f4bdc5fa0e7e54c27dc2de4602f54b9228077ec5ffa6e751e07eb7bb0f1cee654ca3c4e102822405fca407faf4adbb8958aa9cc91a255649419c5aa58e02e4515b42934edd025c9ac40de8fdbba0d2cd34cb871f15f4a85489594db8b735b01732a15740ba78f0a2a03000f01",
+			"output": [
+				"0 | module : interoperability",
+				"1 | command : mainchainRegistration",
+				"2 | fee : 12345678910",
+				"3 | ownChainID : 00030001",
+				"4 | ownName : sidekick"
+			],
+			"output_expert": [
+				"0 | module : interoperability",
+				"1 | command : mainchainRegistration",
+				"2 | fee : 12345678910",
+				"3 | ownChainID : 00030001",
+				"4 | ownName : sidekick"
+			],
+			"signature": "db57f9df1f7c59ce9a7d76a5b88df7e528b25db092e122b93acaebfbbabef791908c7d17d59467f849e5aa49be0d53b47d7bca4cb30471bae7abbbe891160c0c"
+		},
+		{
+			"index": 9,
+			"name": "interoperability_messageRecovery",
+			"blob": "0a10696e7465726f7065726162696c697479120f6d6573736167655265636f76657279180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd832f0010a04000300011220b332bc36bc17dcc6bc22149eac93c7b85dfc02cbb3d72ea0dccaf1b346790ab91232593febebb7262f9ff5195329d36768e6143ecf85dd3f41f3509b52a70c9da68fe0ced7e34d515055504b40640fbf55a87b1812289be9c7a546528407a0510d4b004db629b6180433f6f56a36e87c64b0d76f689602bf66c6d3e6759d1a02010222207eb6ca85aa67f660876eddf786683ba89bdbb9abfe9a0d38e05e057207f35b712220ecad1b56984960d3c85358f50321fdfb81a0e160180c1c56c514f48b3f67fa56222073f75c695ca253c1638b7cf4a1388732463350013edacdf5d04f7e95497045d1",
+			"output": [
+				"0 | module : interoperability",
+				"1 | command : messageRecovery",
+				"2 | fee : 12345678910",
+				"3 | chainID : 00030001"
+			],
+			"output_expert": [
+				"0 | module : interoperability",
+				"1 | command : messageRecovery",
+				"2 | fee : 12345678910",
+				"3 | chainID : 00030001"
+			],
+			"signature": "2f9c3412f6d8683cb8d4975299a69c7139b99ffdb3b806f8b334359fea70a27949f2c80b00d24bd77f80e730087fe804f9a85f28100604c5edfcda298bb5950c"
+		},
+		{
+			"index": 10,
+			"name": "interoperability_messageRecoveryInitialization",
+			"blob": "0a10696e7465726f7065726162696c697479121d6d6573736167655265636f76657279496e697469616c697a6174696f6e180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd8329b010a040003000112289be9c7a546528407a0510d4b004db629b6180433f6f56a36e87c64b0d76f689602bf66c6d3e6759d1a0300010f22207eb6ca85aa67f660876eddf786683ba89bdbb9abfe9a0d38e05e057207f35b712220ecad1b56984960d3c85358f50321fdfb81a0e160180c1c56c514f48b3f67fa56222073f75c695ca253c1638b7cf4a1388732463350013edacdf5d04f7e95497045d1",
+			"output": [
+				"0 | module : interoperability",
+				"1 | command : messageRecoveryInitialization",
+				"2 | fee : 12345678910",
+				"3 | chainID : 00030001"
+			],
+			"output_expert": [
+				"0 | module : interoperability",
+				"1 | command : messageRecoveryInitialization",
+				"2 | fee : 12345678910",
+				"3 | chainID : 00030001"
+			],
+			"signature": "f6475474fd087739cd4754f027d2fb0b66efc84440531d2d64eff992005e424305276e069a7ce1fd565075254542c350b75430c59c93a0cf835efcfd36e4120a"
+		},
+		{
+			"index": 11,
+			"name": "interoperability_sidechainRegistration",
+			"blob": "0a10696e7465726f7065726162696c697479121573696465636861696e526567697374726174696f6e180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd832780a08736964654b69636b1a340a30b3580baa0e11ea8eec105087fec67bcf459100ac5e5c5996332d0ef4787055531e69b9efc489aabf86541fb0a105df7510141a340a30ab901181753fade4eab214027f4bdc5fa0e7e54c27dc2de4602f54b9228077ec5ffa6e751e07eb7bb0f1cee654ca3c4e10282028",
+			"output": [
+				"0 | module : interoperability",
+				"1 | command : sidechainRegistration",
+				"2 | fee : 12345678910",
+				"3 | name : sideKick"
+			],
+			"output_expert": [
+				"0 | module : interoperability",
+				"1 | command : sidechainRegistration",
+				"2 | fee : 12345678910",
+				"3 | name : sideKick",
+				"4 | chainID : 00030001"
+			],
+			"signature": "206c9bacb987e30de6041b7987082e6b8b9831c94cf732157b23b8088846ea5996ccab08c81780fb773db6547fa2773f9cf8d1e971c45f76706edb5ba8669a0f"
+		},
+		{
+			"index": 12,
+			"name": "interoperability_stateRecoveryInitialization",
+			"blob": "0a10696e7465726f7065726162696c697479121b73746174655265636f76657279496e697469616c697a6174696f6e180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd8329b010a040003000112289be9c7a546528407a0510d4b004db629b6180433f6f56a36e87c64b0d76f689602bf66c6d3e6759d1a0300010f22207eb6ca85aa67f660876eddf786683ba89bdbb9abfe9a0d38e05e057207f35b712220ecad1b56984960d3c85358f50321fdfb81a0e160180c1c56c514f48b3f67fa56222073f75c695ca253c1638b7cf4a1388732463350013edacdf5d04f7e95497045d1",
+			"output": [
+				"0 | module : interoperability",
+				"1 | command : stateRecoveryInitialization",
+				"2 | fee : 12345678910",
+				"3 | chainID : 00030001"
+			],
+			"output_expert": [
+				"0 | module : interoperability",
+				"1 | command : stateRecoveryInitialization",
+				"2 | fee : 12345678910",
+				"3 | chainID : 00030001"
+			],
+			"signature": "fa00978d8f396bff1e52129d3ee0f093469e9b5317d5f52483f62444c1d9aa97a654f87e5c974dc6f5abe90858100ac12b579a930af4c33a71a1bc5b8152a901"
+		},
+		{
+			"index": 13,
+			"name": "interoperability_stateRecovery",
+			"blob": "0a10696e7465726f7065726162696c697479120d73746174655265636f76657279180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd832ba010a04000300011205746f6b656e1a4508001214f9ddfa7cb410760904ad0c85936a3c0cdb0d4b591a289be9c7a546528407a0510d4b004db629b6180433f6f56a36e87c64b0d76f689602bf66c6d3e6759d22010122207eb6ca85aa67f660876eddf786683ba89bdbb9abfe9a0d38e05e057207f35b712220ecad1b56984960d3c85358f50321fdfb81a0e160180c1c56c514f48b3f67fa56222073f75c695ca253c1638b7cf4a1388732463350013edacdf5d04f7e95497045d1",
+			"output": [
+				"0 | module : interoperability",
+				"1 | command : stateRecovery",
+				"2 | fee : 12345678910",
+				"3 | chainID : 00030001",
+				"4 | module : token"
+			],
+			"output_expert": [
+				"0 | module : interoperability",
+				"1 | command : stateRecovery",
+				"2 | fee : 12345678910",
+				"3 | chainID : 00030001",
+				"4 | module : token"
+			],
+			"signature": "eaba585c276657600d1d9d8a4cbdb419fd0caa1d443f46e5936809b82455becc98bc08788759de99dd7f830c8a98810d265e2751e17996a57458d71de7dc1005"
+		},
+		{
+			"index": 14,
+			"name": "legacy_reclaimLSK",
+			"blob": "0a066c6567616379120a7265636c61696d4c534b180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd832060880aac1a25b",
+			"output": [
+				"0 | module : legacy",
+				"1 | command : reclaimLSK",
+				"2 | fee : 12345678910",
+				"3 | amount : 24500000000"
+			],
+			"output_expert": [
+				"0 | module : legacy",
+				"1 | command : reclaimLSK",
+				"2 | fee : 12345678910",
+				"3 | amount : 24500000000"
+			],
+			"signature": "5721912e64805b20490647608875ed8f619f3b239795d26c16da8d366f4232c865ef4c2f3ee9c9195afbbd1f9fe6cda1ea3685a9fcf3415cd64a1aab2ebee40f"
+		},
+		{
+			"index": 15,
+			"name": "legacy_registerKeys",
+			"blob": "0a066c6567616379120c72656769737465724b657973180220beb8f0fe2d2a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd832760a30b3580baa0e11ea8eec105087fec67bcf459100ac5e5c5996332d0ef4787055531e69b9efc489aabf86541fb0a105df7512202fa181a001d0e76e059b05a08717f32dfb3c6aaf6f6033a0c058001034aebd6c1a20fe89ca03b79c10fdc856ab63c8375126fb3830f076afaea4b9143b2eb032a9e2",
+			"output": ["0 | module : legacy", "1 | command : registerKeys", "2 | fee : 12345678910"],
+			"output_expert": [
+				"0 | module : legacy",
+				"1 | command : registerKeys",
+				"2 | fee : 12345678910",
+				"3 | generatorKey : fe89ca03b79c10fdc856ab63c8375126fb3830f076afaea4b9143b2eb032a9e2",
+				"4 | blsKey : b3580baa0e11ea8eec105087fec67bcf459100ac5e5c5996332d0ef4787055531e69b9efc489aabf86541fb0a105df75",
+				"5 | proofOfPossession : 2fa181a001d0e76e059b05a08717f32dfb3c6aaf6f6033a0c058001034aebd6c"
+			],
+			"signature": "39815ab802c3b8a4c871182dca933fbd28a8f17437eb7b5f16734e128306d6a5d514a99e57ce5f8e2d7182e44581352fdc49a03849c34594fc8d0319f0a8500b"
+		}
+]
