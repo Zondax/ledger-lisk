@@ -24,8 +24,14 @@
 extern "C" {
 #endif
 
-// #{TODO} --> functions to parse, get, process transaction fields
+parser_error_t initializeItemArray(void);
+parser_error_t display_item(uint8_t type, uint8_t len);
+parser_error_t getItem(uint8_t index, uint8_t* displayIdx);
+parser_error_t addItem(uint8_t displayIdx);
 parser_error_t _read(parser_context_t *c, parser_tx_t *v);
+uint8_t _getNumCommonItems();
+uint8_t _getTxNumItems();
+uint8_t _getNumItems(const parser_context_t *ctx);
 
 #ifdef __cplusplus
 }

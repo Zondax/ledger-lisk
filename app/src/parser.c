@@ -23,9 +23,17 @@
 #include "parser_common.h"
 #include "parser_impl.h"
 #include "parser.h"
+#include "parser_print_items.h"
+
+#include "txn_token_module.h"
+#include "txn_auth_module.h"
+#include "txn_dpos_module.h"
+#include "txn_legacy_module.h"
 
 #include "crypto.h"
 #include "crypto_helper.h"
+
+#include "app_mode.h"
 
 
 parser_error_t parser_init_context(parser_context_t *ctx,
@@ -55,7 +63,6 @@ parser_error_t parser_parse(parser_context_t *ctx,
 }
 
 parser_error_t parser_validate(parser_context_t *ctx) {
-    #if 0
     // Iterate through all items to check that all can be shown and are valid
     uint8_t numItems = 0;
     CHECK_ERROR(parser_getNumItems(ctx, &numItems))
@@ -67,15 +74,11 @@ parser_error_t parser_validate(parser_context_t *ctx) {
         uint8_t pageCount = 0;
         CHECK_ERROR(parser_getItem(ctx, idx, tmpKey, sizeof(tmpKey), tmpVal, sizeof(tmpVal), 0, &pageCount))
     }
-    #endif
-
     return parser_ok;
 }
 
 parser_error_t parser_getNumItems(const parser_context_t *ctx, uint8_t *num_items) {
-    // #{TODO} --> function to retrieve num Items
-    // *num_items = _getNumItems();
-    *num_items = 1;
+    *num_items = _getNumItems(ctx);
     if(*num_items == 0) {
         return parser_unexpected_number_items;
     }
@@ -83,19 +86,22 @@ parser_error_t parser_getNumItems(const parser_context_t *ctx, uint8_t *num_item
 }
 
 static void cleanOutput(char *outKey, uint16_t outKeyLen,
-                        char *outVal, uint16_t outValLen)
-{
+                        char *outVal, uint16_t outValLen) {
     MEMZERO(outKey, outKeyLen);
     MEMZERO(outVal, outValLen);
     snprintf(outKey, outKeyLen, "?");
     snprintf(outVal, outValLen, " ");
 }
 
-static parser_error_t checkSanity(uint8_t numItems, uint8_t displayIdx)
-{
+static parser_error_t checkSanity(uint8_t numItems, uint8_t displayIdx) {
     if ( displayIdx >= numItems) {
         return parser_display_idx_out_of_range;
     }
+    return parser_ok;
+}
+
+parser_error_t parser_getTxNumItems(const parser_context_t *ctx, uint8_t *tx_num_items) {
+    *tx_num_items = _getTxNumItems();
     return parser_ok;
 }
 
@@ -113,24 +119,63 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
     CHECK_ERROR(checkSanity(numItems, displayIdx))
     cleanOutput(outKey, outKeyLen, outVal, outValLen);
 
-    switch (displayIdx)
+    uint8_t txItems = 0;
+    CHECK_ERROR(parser_getTxNumItems(ctx, &txItems))
+
+    const uint8_t common_items = _getNumCommonItems();
+
+    if (displayIdx < common_items) {
+        return print_common_items(ctx, displayIdx, outKey, outKeyLen,
+                                  outVal, outValLen, pageIdx, pageCount);
+    }
+
+    displayIdx-=common_items;
+    uint8_t txDisplayIdx = 0;
+    
+    switch (ctx->tx_obj->module_id)
     {
-        case 0: {
-            uint8_t hash[32] = {0};
-            char hash_str[100] = {0};
-            CHECK_ERROR(crypto_hash(ctx->buffer, ctx->bufferLen,
-                                    hash, sizeof(hash)))
-            array_to_hexstr((char*) &hash_str, sizeof(hash_str),
-                            (const uint8_t*) &hash, sizeof(hash));
+        case TX_MODULE_ID_TOKEN:
+            switch (ctx->tx_obj->command_id)
+            {
+                case TX_COMMAND_ID_TRANSFER:
+                    return print_module_token_transfer(ctx, displayIdx, outKey, outKeyLen,
+                                      outVal, outValLen, pageIdx, pageCount);
+                case TX_COMMAND_ID_CROSSCHAIN_TRANSFER:
+                    return print_module_token_cross(ctx, displayIdx, outKey, outKeyLen,
+                                      outVal, outValLen, pageIdx, pageCount);
+                default:
+                    return parser_unexpected_value; 
+            }
+        case TX_MODULE_ID_AUTH:
+            CHECK_ERROR(getItem(displayIdx, &txDisplayIdx))
+            return print_module_auth_reg(ctx, displayIdx, txDisplayIdx, outKey, outKeyLen,
+                                      outVal, outValLen, pageIdx, pageCount);
 
-            // Display Item 0
-            snprintf(outKey, outKeyLen, "Txn hash");
-            pageString(outVal, outValLen, (const char*) &hash_str, pageIdx, pageCount);
-            return parser_ok;
-        }
+        case TX_MODULE_ID_DPOS:
+            switch (ctx->tx_obj->command_id)
+            {
+                case TX_COMMAND_ID_REGISTER_DELEGATE:
+                    return print_module_dpos_reg_delegate(ctx, displayIdx, outKey, outKeyLen,
+                                      outVal, outValLen, pageIdx, pageCount);
 
-    default:
-        break;
+                case TX_COMMAND_ID_VOTE_DELEGATE:
+                    CHECK_ERROR(getItem(displayIdx, &txDisplayIdx))
+                    return print_module_dpos_vote(ctx, displayIdx,  txDisplayIdx, outKey, outKeyLen,
+                                       outVal, outValLen, pageIdx, pageCount);
+
+                case TX_COMMAND_ID_UNLOCK_TOKEN:
+                case TX_COMMAND_ID_REPORT_DELEGATE_MISBEHAVIOUR:
+                default:
+                    return parser_unexpected_value; 
+            }
+
+        case TX_MODULE_ID_LEGACY:
+            return print_module_legacy_reclaim(ctx, displayIdx, outKey, outKeyLen,
+                                outVal, outValLen, pageIdx, pageCount);
+        
+        default:
+            return parser_unexpected_value;
+
     }
 
     return parser_display_idx_out_of_range;

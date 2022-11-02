@@ -27,6 +27,7 @@
 #include "actions.h"
 #include "tx.h"
 #include "addr.h"
+#include "msg.h"
 #include "crypto.h"
 #include "coin.h"
 #include "zxmacros.h"
@@ -53,17 +54,16 @@ void extractHDPath(uint32_t rx, uint32_t offset) {
     hdPath.pathLength = pathLength;
     memcpy(hdPath.path, G_io_apdu_buffer + offset, sizeof(uint32_t) * pathLength);
 
-#if 0
-    const bool mainnet = hdPath[0] == HDPATH_0_DEFAULT &&
-                         hdPath[1] == HDPATH_1_DEFAULT;
+    const bool mainnet = hdPath.path[0] == HDPATH_0_DEFAULT &&
+                         hdPath.path[1] == HDPATH_1_DEFAULT;
 
-    const bool testnet = hdPath[0] == HDPATH_0_DEFAULT &&
-                         hdPath[1] == HDPATH_1_TESTNET;
+    const bool testnet = hdPath.path[0] == HDPATH_0_DEFAULT &&
+                         hdPath.path[1] == HDPATH_1_TESTNET;
 
     if (!mainnet && !testnet) {
         THROW(APDU_CODE_DATA_INVALID);
     }
-#endif
+
 }
 
 __Z_INLINE bool process_chunk(__Z_UNUSED volatile uint32_t *tx, uint32_t rx) {
@@ -152,16 +152,7 @@ __Z_INLINE void handleSignMessage(volatile uint32_t *flags, volatile uint32_t *t
         THROW(APDU_CODE_OK);
     }
 
-    const char *error_msg = tx_parse();
-    CHECK_APP_CANARY()
-    if (error_msg != NULL) {
-        int error_msg_length = strlen(error_msg);
-        memcpy(G_io_apdu_buffer, error_msg, error_msg_length);
-        *tx += (error_msg_length);
-        THROW(APDU_CODE_DATA_INVALID);
-    }
-
-    view_review_init(tx_getItem, tx_getNumItems, app_sign_message);
+    view_review_init(msg_getItem, msg_getNumItems, app_sign_message);
     view_review_show(REVIEW_TXN);
     *flags |= IO_ASYNCH_REPLY;
 }

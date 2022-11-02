@@ -42,8 +42,9 @@ extern "C" {
 #define MAX_SIGN_SIZE 256u
 #define BLAKE2B_DIGEST_SIZE 32u
 
-#define COIN_AMOUNT_DECIMAL_PLACES 18
+#define COIN_AMOUNT_DECIMAL_PLACES 8
 #define COIN_TICKER "LSK "
+#define UNVOTE_COIN_TICKER "LSK -"
 #define COIN_HRP "lsk"
 
 #define MENU_MAIN_APP_LINE1 "Lisk"

@@ -117,15 +117,12 @@ void check_testcase(const testcase_t &tc, bool expert_mode) {
 
     std::vector<std::string> expected = app_mode_expert() ? tc.expected_expert : tc.expected;
 
-    // #{TODO} --> After updating testvector, enable this part
-    #if 0
     EXPECT_EQ(output.size(), expected.size());
     for (size_t i = 0; i < expected.size(); i++) {
         if (i < output.size()) {
             EXPECT_THAT(output[i], testing::Eq(expected[i]));
         }
     }
-    #endif
 }
 
 INSTANTIATE_TEST_SUITE_P
@@ -136,4 +133,6 @@ INSTANTIATE_TEST_SUITE_P
     ::testing::ValuesIn(GetJsonTestCases("testcases.json")),
     JsonTestsA::PrintToStringParamName()
 );
-TEST_P(JsonTestsA, CheckUIOutput_CurrentTX_Expert) { check_testcase(GetParam(), true); }
+
+TEST_P(JsonTestsA, JsonTestsA_CheckUIOutput_CurrentTX_Normal) { check_testcase(GetParam(), false); }
+TEST_P(JsonTestsA, JsonTestsA_CheckUIOutput_CurrentTX_Expert) { check_testcase(GetParam(), true); }

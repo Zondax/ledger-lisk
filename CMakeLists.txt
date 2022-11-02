@@ -114,8 +114,14 @@ file(GLOB_RECURSE LIB_SRC
         ####
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/parser.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/parser_impl.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/parser_utils.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/lisk_base32.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/crypto_helper.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/parser_print_items.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/txn_token_module.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/txn_auth_module.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/txn_dpos_module.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/txn_legacy_module.c
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/picohash/
         )
 
