@@ -1,5 +1,16 @@
 # Lisk App
 
+## Supported Lisk Transactions
+
+- Token Transfer
+- Cross Chain Token Transfer
+- Multisignature Group Registration
+- Delegate Registration
+- Delegate Vote
+- Token Unlock
+- Delegate Misbehavior
+- Legacy Reclaim
+
 ## General structure
 
 The general structure of commands and responses is as follows:
@@ -201,3 +212,51 @@ All other packets/chunks contain data chunks that are described below
 | ------- | --------- | ----------- | ------------------------ |
 | SIG     | byte (65) | Signature   |                          |
 | SW1-SW2 | byte (2)  | Return code | see list of return codes |
+
+
+---
+
+### INS_SIGN_MSG
+
+#### Command
+
+| Field   | Type        | Content                   | Expected   |
+| ------- | --------    | ------------------------- | ---------- |
+| CLA     | byte (1)    | Application Identifier    | 0x80       |
+| INS     | byte (1)    | Instruction ID            | 0x03       |
+| P1      | byte (1)    | Payload desc              | 0 = init   |
+|         |             |                           | 1 = add    |
+|         |             |                           | 2 = last   |
+| P2      | byte (1)    | ----                      | not used   |
+| L       | byte (1)    | Bytes in payload          | (depends)  |
+
+
+This instruction signs a message received in the payload
+
+The resulting sequence of chunks is as follows:
+
+##### First Packet
+
+| Field   | Type     | Content              | Expected |
+| ------- | -------- | -------------------- | -------- |
+| Path[0] | byte (4) | Derivation Path Data | 44       |
+| Path[1] | byte (4) | Derivation Path Data | 134      |
+| Path[2] | byte (4) | Derivation Path Data | ?        |
+| Path[3] | byte (4) | Derivation Path Data | ?        |
+| Path[4] | byte (4) | Derivation Path Data | ?        |
+
+##### Other Chunks/Packets
+
+| Field   | Type     | Content         | Expected |
+| ------- | -------- | --------------- | -------- |
+| Message | bytes... | Message to Sign |          |
+
+
+#### Response
+
+| Field          | Type      | Content              | Note                     |
+| -------------- | --------- | -------------------- | ------------------------ |
+| Signature      | byte (64)| Signed message       |                          |
+| SW1-SW2        | byte (2)  | Return code          | see list of return codes |
+
+---
