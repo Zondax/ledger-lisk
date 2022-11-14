@@ -25,8 +25,6 @@
 #include "crypto_helper.h"
 #include "tx.h"
 
-#define IS_PRINTABLE(c) ((c >= 0x20 && c <= 0x7e) || (c >= 0x80 && c <= 0xFF))
-
 zxerr_t msg_getNumItems(uint8_t *num_items) {
     zemu_log_stack("msg_getNumItems");
     *num_items = 1;
