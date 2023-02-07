@@ -55,14 +55,6 @@ static parser_error_t parse_transfer(parser_context_t *ctx, tx_command_token_tra
     transfer->data = ctx->buffer + ctx->offset;
     CHECK_ERROR(_verifyBytes(ctx, tmp64))
 
-    if(ctx->bufferLen == ctx->offset) {
-         transfer->accountInitializationFee = USER_ACCOUNT_INITIALIZATION_FEE;
-    } else {
-        //Read accountInitializationFee
-        GET_KEY_AND_VARUINT(ctx, tmp64);
-        transfer->accountInitializationFee = tmp64;
-    }
-
     return parser_ok;
 }
 
@@ -111,15 +103,15 @@ static parser_error_t parse_crosschain_transfer(parser_context_t *ctx, tx_comman
     GET_KEY_AND_VARUINT(ctx, tmp64);
     transfer->messageFee = tmp64;
 
-    if(ctx->bufferLen == ctx->offset) {
-         transfer->escrowInitializationFee = ESCROW_ACCOUNT_INITIALIZATION_FEE;
-    } else {
-        // Read escrowInitializationFee
-        GET_KEY_AND_VARUINT(ctx, tmp64);
-        transfer->escrowInitializationFee = tmp64;
+    //Read messageFeeTokenID
+    GET_KEY_AND_VARUINT(ctx, tmp64);
+    if (tmp64 != MSG_FEE_TOKEN_ID_LENGTH) {
+        return parser_unexpected_value;
     }
+    transfer->messageFeeTokenID = ctx->buffer + ctx->offset;
+    CHECK_ERROR(_verifyBytes(ctx, MSG_FEE_TOKEN_ID_LENGTH))
 
-       return parser_ok;
+    return parser_ok;
 }
 
 parser_error_t parse_token_module(parser_context_t *ctx, parser_tx_t *tx_obj) {
@@ -166,14 +158,6 @@ parser_error_t print_module_token_transfer(const parser_context_t *ctx,
             _encodeAddressHash((uint8_t *) buf, sizeof(buf),(const uint8_t *) ctx->tx_obj->tx_command._token_transfer.recipientAddress);
             snprintf(outKey, outKeyLen, "RxAddress");
             pageString(outVal, outValLen, (const char*) &buf, pageIdx, pageCount);
-            return parser_ok;
-        }
-
-        case TOKEN_TRANSFER_ACCNT_INIT_FEE_TYPE: {
-            snprintf(outKey, outKeyLen, "AcntInitFee");
-            if (uint64_to_str(outVal, outValLen, ctx->tx_obj->tx_command._token_transfer.accountInitializationFee) != NULL) {
-                return parser_unexpected_error;
-            }
             return parser_ok;
         }
 
@@ -231,20 +215,20 @@ parser_error_t print_module_token_cross(const parser_context_t *ctx,
             return parser_ok;
         }
 
-        case TOKEN_CROSSCHAIN_ESCROW_FEE_TYPE: {
-            snprintf(outKey, outKeyLen, "EscrowInitFee");
-            if (uint64_to_str(outVal, outValLen, ctx->tx_obj->tx_command._token_crosschain_transfer.escrowInitializationFee) != NULL) {
-                return parser_unexpected_error;
-            }
-            return parser_ok;
-        }
-
         case TOKEN_CROSSCHAIN_MSG_FEE_TYPE: {
             snprintf(outKey, outKeyLen, "MsgFee");
             if (uint64_to_str(outVal, outValLen, ctx->tx_obj->tx_command._token_crosschain_transfer.messageFee) != NULL) {
                 return parser_unexpected_error;
             }
             return parser_ok;
+        }
+
+        case TOKEN_CROSSCHAIN_MSG_FEE_TOKEN_ID_TYPE: {
+           array_to_hexstr(buf, sizeof(buf), ctx->tx_obj->tx_command._token_crosschain_transfer.messageFeeTokenID,MSG_FEE_TOKEN_ID_LENGTH);
+           snprintf(outKey, outKeyLen, "MsgFeeTokenId");
+           pageString(outVal, outValLen, (const char*) &buf, pageIdx, pageCount);
+
+           return parser_ok;
         }
 
         case TOKEN_CROSSCHAIN_DATA_TYPE: {

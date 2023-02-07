@@ -179,7 +179,7 @@ uint8_t _getNumItems(const parser_context_t *ctx) {
             switch (ctx->tx_obj->command_id ) {
                 case TX_COMMAND_ID_TRANSFER:
                     dataItem = (ctx->tx_obj->tx_command._token_transfer.dataLength > 0 && app_mode_expert()) ? 1 : 0;
-                    items += 4 + dataItem;
+                    items += 3 + dataItem;
                     break;
                 case TX_COMMAND_ID_CROSSCHAIN_TRANSFER:
                     dataItem = (ctx->tx_obj->tx_command._token_crosschain_transfer.dataLength > 0 && app_mode_expert()) ? 1 : 0;

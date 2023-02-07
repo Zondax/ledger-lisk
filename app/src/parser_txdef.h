@@ -34,6 +34,7 @@ extern "C" {
 #define MAX_COMMAND_NAME_LENGTH 32
 #define NETWORK_ID_LENGTH 32
 #define TOKEN_ID_LENGTH 8
+#define MSG_FEE_TOKEN_ID_LENGTH 8
 #define CHAIN_ID_LENGTH 4
 #define BLS_PUBLIC_KEY_LENGTH 48
 #define BLS_POP_LENGTH 96
@@ -70,7 +71,6 @@ typedef enum token_transfer_fields {
   TOKEN_TRANSFER_TOKEN_ID_TYPE = 0,
   TOKEN_TRANSFER_AMOUNT_TYPE,
   TOKEN_TRANSFER_RX_ADDRESS_TYPE,
-  TOKEN_TRANSFER_ACCNT_INIT_FEE_TYPE,
   TOKEN_TRANSFER_DATA_TYPE,
 } token_transfer_fields;
 
@@ -79,8 +79,8 @@ typedef enum token_crosschain_fields {
   TOKEN_CROSSCHAIN_AMOUNT_TYPE,
   TOKEN_CROSSCHAIN_RX_ADDRESS_TYPE,
   TOKEN_CROSSCHAIN_RX_CHAIN_ID_TYPE,
-  TOKEN_CROSSCHAIN_ESCROW_FEE_TYPE,
   TOKEN_CROSSCHAIN_MSG_FEE_TYPE,
+  TOKEN_CROSSCHAIN_MSG_FEE_TOKEN_ID_TYPE,
   TOKEN_CROSSCHAIN_DATA_TYPE,
 } token_crosschain_fields;
 
@@ -114,7 +114,6 @@ typedef struct tx_command_token_transfer {
   uint8_t recipientAddress[ADDRESS_HASH_LENGTH];
   const uint8_t *data;
   uint32_t dataLength;
-  uint64_t accountInitializationFee;
 } tx_command_token_transfer_t;
 
 typedef struct tx_command_token_crosschain_transfer {
@@ -125,7 +124,7 @@ typedef struct tx_command_token_crosschain_transfer {
   const uint8_t *data;
   uint32_t dataLength;
   uint64_t messageFee;
-  uint64_t escrowInitializationFee;
+  const uint8_t *messageFeeTokenID;
 } tx_command_token_crosschain_transfer_t;
 
 typedef struct tx_command_auth_multisig_group {
