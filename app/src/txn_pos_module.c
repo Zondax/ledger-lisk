@@ -21,7 +21,7 @@
 #include "zxformat.h"
 #include "coin.h"
 
-static parser_error_t parse_reg_delegate(parser_context_t *ctx, tx_command_dpos_reg_delegate_t *transfer) {
+static parser_error_t parse_reg_validator(parser_context_t *ctx, tx_command_pos_reg_validator_t *transfer) {
 
     uint64_t tmp64 = 0;
 
@@ -36,6 +36,21 @@ static parser_error_t parse_reg_delegate(parser_context_t *ctx, tx_command_dpos_
     transfer->name = ctx->buffer + ctx->offset;
     CHECK_ERROR(_verifyBytes(ctx, tmp64))
 
+    // Read blskey
+    GET_KEY_AND_VARUINT(ctx, tmp64);
+    if (tmp64 != BLS_PUBLIC_KEY_LENGTH) {
+        return parser_unexpected_value;
+    }
+    transfer->blskey = ctx->buffer + ctx->offset;
+    CHECK_ERROR(_verifyBytes(ctx, BLS_PUBLIC_KEY_LENGTH))
+
+    // Read proofOfPossession
+    GET_KEY_AND_VARUINT(ctx, tmp64);
+    if (tmp64 != BLS_POP_LENGTH) {
+        return parser_unexpected_value;
+    }
+    transfer->proofOfPossession = ctx->buffer + ctx->offset;
+    CHECK_ERROR(_verifyBytes(ctx, BLS_POP_LENGTH))
 
     // Read generatorKey
     GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -45,34 +60,10 @@ static parser_error_t parse_reg_delegate(parser_context_t *ctx, tx_command_dpos_
     transfer->generatorKey = ctx->buffer + ctx->offset;
     CHECK_ERROR(_verifyBytes(ctx, ED25519_PUBLIC_KEY_LENGTH))
 
-    // Read blskey
-    GET_KEY_AND_VARUINT(ctx, tmp64);
-    if (tmp64 != BLS_PUBLIC_KEY_LENGTH) {
-        return parser_unexpected_value;
-    }
-    transfer->blskey = ctx->buffer + ctx->offset;
-    CHECK_ERROR(_verifyBytes(ctx, BLS_PUBLIC_KEY_LENGTH))
-
-     // Read proofOfPossession
-    GET_KEY_AND_VARUINT(ctx, tmp64);
-    if (tmp64 != BLS_POP_LENGTH) {
-        return parser_unexpected_value;
-    }
-    transfer->proofOfPossession = ctx->buffer + ctx->offset;
-    CHECK_ERROR(_verifyBytes(ctx, BLS_POP_LENGTH))
-
-    // Read delegateRegistrationFee
-    if(ctx->offset < ctx->bufferLen) {
-        GET_KEY_AND_VARUINT(ctx, tmp64);
-        transfer->delegateRegistrationFee = tmp64;
-    } else {
-        transfer->delegateRegistrationFee = 0;
-    }
-
     return parser_ok;
 }
 
-static parser_error_t parse_vote_delegate(parser_context_t *ctx, tx_command_dpos_vote_delegate_t *transfer) {
+static parser_error_t parse_stake(parser_context_t *ctx, tx_command_pos_stake_t *transfer) {
 
     uint64_t tmp64 = 0;
     int64_t stmp64 = 0;
@@ -82,9 +73,9 @@ static parser_error_t parse_vote_delegate(parser_context_t *ctx, tx_command_dpos
 
     transfer->start = ctx->buffer + ctx->offset;
     while(ctx->offset < ctx->bufferLen) {
-        // Get vote size
+        // Get stake size
         GET_KEY_AND_VARUINT(ctx, tmp64);
-        transfer->voteSize[transfer->n_vote] = tmp64;
+        transfer->stakeSize[transfer->n_stake] = tmp64;
 
         // Get address size
         GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -92,21 +83,21 @@ static parser_error_t parse_vote_delegate(parser_context_t *ctx, tx_command_dpos
             return parser_unexpected_value;
         }
         _verifyBytes(ctx,ADDRESS_HASH_LENGTH);
-        display_item(DPOS_VOTE_ADDRESS_TYPE,1);
+        display_item(POS_STAKE_ADDRESS_TYPE,1);
 
         // Get amount
         CHECK_ERROR(_readUnsignedVarint(ctx, &tmp64))
         CHECK_ERROR(_readSignedVarint(ctx, &stmp64))
         mod_stmp64 = (stmp64 < 0 ? -stmp64 : stmp64);
 
-        if(mod_stmp64 == 0 || (mod_stmp64 % BASE_VOTE_AMOUNT != 0)) {
+        if(mod_stmp64 == 0 || (mod_stmp64 % BASE_STAKE_AMOUNT != 0)) {
              return parser_unexpected_value;
          }
-        transfer->amounts[transfer->n_vote] = stmp64;
-        transfer->n_vote++;
-        display_item(DPOS_VOTE_AMOUNT_TYPE,1);
+        transfer->amounts[transfer->n_stake] = stmp64;
+        transfer->n_stake++;
+        display_item(POS_STAKE_AMOUNT_TYPE,1);
 
-        if(transfer->n_vote > 2*MAX_NUMBER_SENT_VOTES) {
+        if(transfer->n_stake > 2*MAX_NUMBER_SENT_STAKES) {
             return parser_unexpected_value;
         }
     }
@@ -114,7 +105,7 @@ static parser_error_t parse_vote_delegate(parser_context_t *ctx, tx_command_dpos
     return parser_ok;
 }
 
-static parser_error_t parse_unlock_token(parser_context_t *ctx, tx_command_dpos_unlock_token_t *transfer) {
+static parser_error_t parse_unlock(parser_context_t *ctx, tx_command_pos_unlock_t *transfer) {
 
     uint64_t tmp64 = 0;
 
@@ -124,7 +115,7 @@ static parser_error_t parse_unlock_token(parser_context_t *ctx, tx_command_dpos_
     return parser_ok;
 }
 
-static parser_error_t parse_delegate_misbehavior(parser_context_t *ctx, tx_command_dpos_delegate_misbehavior_t *transfer) {
+static parser_error_t parse_misbehavior(parser_context_t *ctx, tx_command_pos_misbehavior_t *transfer) {
 
     while(ctx->offset < ctx->bufferLen) {
          _verifyBytes(ctx,1);
@@ -132,20 +123,51 @@ static parser_error_t parse_delegate_misbehavior(parser_context_t *ctx, tx_comma
     return parser_ok;
 }
 
-parser_error_t parse_dpos_module(parser_context_t *ctx, parser_tx_t *tx_obj) {
+static parser_error_t parse_claim_rewards(parser_context_t *ctx, tx_command_pos_claim_rewards_t *transfer) {
+
+    while(ctx->offset < ctx->bufferLen) {
+         _verifyBytes(ctx,1);
+    }
+    return parser_ok;
+}
+
+static parser_error_t parse_change_comission(parser_context_t *ctx, tx_command_pos_change_commissions_t *transfer) {
+    
+    uint64_t tmp64 = 0;
+
+    // commands is serialized as bytes, varint first for the size
+    GET_KEY_AND_VARUINT(ctx, tmp64);
+
+    // Read newCommission
+    GET_KEY_AND_VARUINT(ctx, tmp64);
+    if (tmp64 > UINT32_MAX ) {
+        return parser_unexpected_value;
+    }
+    transfer->newCommission = (uint32_t) tmp64;
+
+    return parser_ok;
+}
+
+parser_error_t parse_pos_module(parser_context_t *ctx, parser_tx_t *tx_obj) {
 
     switch (tx_obj->command_id) {
-        case TX_COMMAND_ID_REGISTER_DELEGATE:
-            CHECK_ERROR(parse_reg_delegate(ctx, &tx_obj->tx_command._dpos_reg_delegate))
+        case TX_COMMAND_ID_REGISTER_VALIDATOR:
+            CHECK_ERROR(parse_reg_validator(ctx, &tx_obj->tx_command._pos_reg_validator))
             break;
-        case TX_COMMAND_ID_VOTE_DELEGATE:
-            CHECK_ERROR(parse_vote_delegate(ctx, &tx_obj->tx_command._dpos_vote_delegate))
+        case TX_COMMAND_ID_STAKE:
+            CHECK_ERROR(parse_stake(ctx, &tx_obj->tx_command._pos_stake))
             break;
-        case TX_COMMAND_ID_UNLOCK_TOKEN:
-            CHECK_ERROR(parse_unlock_token(ctx, &tx_obj->tx_command._dpos_unlock_token))
+        case TX_COMMAND_ID_UNLOCK:
+            CHECK_ERROR(parse_unlock(ctx, &tx_obj->tx_command._pos_unlock))
             break;
-        case TX_COMMAND_ID_REPORT_DELEGATE_MISBEHAVIOUR:
-            CHECK_ERROR(parse_delegate_misbehavior(ctx, &tx_obj->tx_command._dpos_delegate_misbehavior))
+        case TX_COMMAND_ID_REPORT_MISBEHAVIOUR:
+            CHECK_ERROR(parse_misbehavior(ctx, &tx_obj->tx_command._pos_misbehavior))
+            break;
+        case TX_COMMAND_ID_CLAIM_REWARDS:
+            CHECK_ERROR(parse_claim_rewards(ctx, &tx_obj->tx_command._pos_claim_rewards))
+            break;
+        case TX_COMMAND_ID_CHANGE_COMMISSION:
+            CHECK_ERROR(parse_change_comission(ctx, &tx_obj->tx_command._pos_change_commissions))
             break;
         default:
             return parser_unexpected_method;
@@ -154,7 +176,7 @@ parser_error_t parse_dpos_module(parser_context_t *ctx, parser_tx_t *tx_obj) {
     return parser_ok;
 }
 
-parser_error_t print_module_dpos_vote(const parser_context_t *ctx,
+parser_error_t print_module_pos_stake(const parser_context_t *ctx,
                                   uint8_t displayIdx, uint8_t displayType,
                                   char *outKey, uint16_t outKeyLen,
                                   char *outVal, uint16_t outValLen,
@@ -162,29 +184,29 @@ parser_error_t print_module_dpos_vote(const parser_context_t *ctx,
 
     *pageCount = 1;
     switch (displayType) {
-        case DPOS_VOTE_ADDRESS_TYPE: {
+        case POS_STAKE_ADDRESS_TYPE: {
             const uint8_t tmpIdx = displayIdx/2;
             char addr_str[42] = {0};
-            uint32_t vote_offset = 0;
+            uint32_t stake_offset = 0;
 
             for(uint8_t i = 0; i < tmpIdx; i++) {
-                vote_offset += DPOS_VOTE_SIZE_OFFSET + ctx->tx_obj->tx_command._dpos_vote_delegate.voteSize[i];
+                stake_offset += DPOS_STAKE_SIZE_OFFSET + ctx->tx_obj->tx_command._pos_stake.stakeSize[i];
             }
 
-            _encodeAddressHash((uint8_t*) &addr_str, sizeof(addr_str),ctx->tx_obj->tx_command._dpos_vote_delegate.start + DPOS_VOTE_ADDRESS_OFFSET + vote_offset) ;
+            _encodeAddressHash((uint8_t*) &addr_str, sizeof(addr_str),ctx->tx_obj->tx_command._pos_stake.start + DPOS_STAKE_ADDRESS_OFFSET + stake_offset) ;
     
-            snprintf(outKey, outKeyLen, "Votes %d", tmpIdx);
+            snprintf(outKey, outKeyLen, "Stakes %d", tmpIdx);
             pageString(outVal, outValLen, (const char*) &addr_str, pageIdx, pageCount);
             return parser_ok;
         }
-        case DPOS_VOTE_AMOUNT_TYPE: {
+        case POS_STAKE_AMOUNT_TYPE: {
             if(displayIdx == 0) return parser_unexpected_value;
 
             const uint8_t tmpIdx = (displayIdx - 1)/2;
-            int64_t tmp64 = (ctx->tx_obj->tx_command._dpos_vote_delegate.amounts[tmpIdx] < 0) ? -ctx->tx_obj->tx_command._dpos_vote_delegate.amounts[tmpIdx] : ctx->tx_obj->tx_command._dpos_vote_delegate.amounts[tmpIdx] ;
+            int64_t tmp64 = (ctx->tx_obj->tx_command._pos_stake.amounts[tmpIdx] < 0) ? -ctx->tx_obj->tx_command._pos_stake.amounts[tmpIdx] : ctx->tx_obj->tx_command._pos_stake.amounts[tmpIdx] ;
             
-            snprintf(outKey, outKeyLen, "Votes %d", tmpIdx);
-            return _toStringVoteAmount((uint64_t *)&tmp64, (ctx->tx_obj->tx_command._dpos_vote_delegate.amounts[tmpIdx] < 0) ? UNVOTE_COIN_TICKER : COIN_TICKER,
+            snprintf(outKey, outKeyLen, "Stakes %d", tmpIdx);
+            return _toStringStakeAmount((uint64_t *)&tmp64, (ctx->tx_obj->tx_command._pos_stake.amounts[tmpIdx] < 0) ? UNSTAKE_COIN_TICKER : COIN_TICKER,
                         outVal, outValLen, pageIdx, pageCount);
         }
         default:
@@ -193,7 +215,7 @@ parser_error_t print_module_dpos_vote(const parser_context_t *ctx,
     return parser_display_idx_out_of_range;
 }
 
-parser_error_t print_module_dpos_reg_delegate(const parser_context_t *ctx,
+parser_error_t print_module_pos_reg_validator(const parser_context_t *ctx,
                                   uint8_t displayIdx,
                                   char *outKey, uint16_t outKeyLen,
                                   char *outVal, uint16_t outValLen,
@@ -202,31 +224,31 @@ parser_error_t print_module_dpos_reg_delegate(const parser_context_t *ctx,
     *pageCount = 1;
     char buf[BLS_POP_LENGTH * 2 + 1] = {0};
     switch (displayIdx) {
-        case DPOS_REG_DELEGATE_NAME_TYPE: {
-            MEMCPY(buf, ctx->tx_obj->tx_command._dpos_reg_delegate.name, ctx->tx_obj->tx_command._dpos_reg_delegate.nameLength);
+        case POS_REG_VALIDATOR_NAME_TYPE: {
+            MEMCPY(buf, ctx->tx_obj->tx_command._pos_reg_validator.name, ctx->tx_obj->tx_command._pos_reg_validator.nameLength);
             snprintf(outKey, outKeyLen, "Name");
             pageString(outVal, outValLen, buf, pageIdx, pageCount);
             return parser_ok;
         }
 
-        case DPOS_REG_DELEGATE_GENKEY_TYPE: {
-            array_to_hexstr(buf, sizeof(buf), ctx->tx_obj->tx_command._dpos_reg_delegate.generatorKey,
+        case POS_REG_VALIDATOR_GENKEY_TYPE: {
+            array_to_hexstr(buf, sizeof(buf), ctx->tx_obj->tx_command._pos_reg_validator.generatorKey,
                             ED25519_PUBLIC_KEY_LENGTH);
             snprintf(outKey, outKeyLen, "GenKey");
             pageString(outVal, outValLen, buf, pageIdx, pageCount);
             return parser_ok;
         }
 
-        case DPOS_REG_DELEGATE_BLSKEY_TYPE: {
-            array_to_hexstr(buf, sizeof(buf),ctx->tx_obj->tx_command._dpos_reg_delegate.blskey,
+        case POS_REG_VALIDATOR_BLSKEY_TYPE: {
+            array_to_hexstr(buf, sizeof(buf),ctx->tx_obj->tx_command._pos_reg_validator.blskey,
                             BLS_PUBLIC_KEY_LENGTH);
             snprintf(outKey, outKeyLen, "BlsKey");
             pageString(outVal, outValLen, buf, pageIdx, pageCount);
             return parser_ok;
         }
 
-        case DPOS_REG_DELEGATE_POP_TYPE: {
-            array_to_hexstr(buf, sizeof(buf),ctx->tx_obj->tx_command._dpos_reg_delegate.proofOfPossession,
+        case POS_REG_VALIDATOR_POP_TYPE: {
+            array_to_hexstr(buf, sizeof(buf),ctx->tx_obj->tx_command._pos_reg_validator.proofOfPossession,
                             BLS_POP_LENGTH);
             snprintf(outKey, outKeyLen, "PoP");
             pageString(outVal, outValLen, buf, pageIdx, pageCount);
@@ -236,5 +258,22 @@ parser_error_t print_module_dpos_reg_delegate(const parser_context_t *ctx,
             break;
     }
 
+    return parser_display_idx_out_of_range;
+}
+
+parser_error_t print_module_pos_change_commission(const parser_context_t *ctx,
+                                  uint8_t displayIdx,
+                                  char *outKey, uint16_t outKeyLen,
+                                  char *outVal, uint16_t outValLen,
+                                  uint8_t pageIdx, uint8_t *pageCount) {
+    *pageCount = 1;
+
+    if(displayIdx == 0) {
+        snprintf(outKey, outKeyLen, "NewCommission");
+        if (uint64_to_str(outVal, outValLen, ctx->tx_obj->tx_command._pos_change_commissions.newCommission) != NULL) {
+            return parser_unexpected_error;
+        }
+        return parser_ok;
+    }
     return parser_display_idx_out_of_range;
 }

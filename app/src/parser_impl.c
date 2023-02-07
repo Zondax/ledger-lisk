@@ -19,7 +19,7 @@
 #include "txn_token_module.h"
 #include "txn_auth_module.h"
 #include "txn_legacy_module.h"
-#include "txn_dpos_module.h"
+#include "txn_pos_module.h"
 #include "app_mode.h"
 
 static uint8_t tx_num_items;
@@ -33,17 +33,19 @@ static uint8_t itemIndex = 0;
 static const string_subst_t module_substitutions[] = {
         {"token",  0},
         {"auth",   1},
-        {"dpos",   2},
+        {"pos",   2},
         {"legacy", 3},
 };
 static const string_subst_t command_substitutions[] = {
         {"transfer",                    0},
         {"transferCrossChain",          1},
         {"registerMultisignature",      0},
-        {"registerDelegate",            0},
-        {"vote",                        1},
+        {"registerValidator",           0},
+        {"stake",                       1},
         {"unlock",                      2},
         {"reportMisbehavior",           3},
+        {"claimRewards",                4},
+        {"changeCommission",            5},
         {"reclaimLSK",                  0},
 };
 
@@ -172,7 +174,6 @@ uint8_t _getNumCommonItems() {
 uint8_t _getNumItems(const parser_context_t *ctx) {
     uint8_t items = _getNumCommonItems();
     uint8_t dataItem = 0;
-    uint8_t msgfee = 0;
 
     switch (ctx->tx_obj->module_id) {
         case TX_MODULE_ID_TOKEN: {
@@ -183,8 +184,7 @@ uint8_t _getNumItems(const parser_context_t *ctx) {
                     break;
                 case TX_COMMAND_ID_CROSSCHAIN_TRANSFER:
                     dataItem = (ctx->tx_obj->tx_command._token_crosschain_transfer.dataLength > 0 && app_mode_expert()) ? 1 : 0;
-                    msgfee = ((app_mode_expert()) ? 1 : 0);
-                    items += 5 + dataItem + msgfee;
+                    items += 4 + dataItem + ((app_mode_expert()) ? 2 : 0);
                     break;
                 default:
                     items = 0;
@@ -196,17 +196,21 @@ uint8_t _getNumItems(const parser_context_t *ctx) {
                 items += _getTxNumItems();
             break;
 
-        case TX_MODULE_ID_DPOS: {
+        case TX_MODULE_ID_POS: {
             switch (ctx->tx_obj->command_id ) {
-                case TX_COMMAND_ID_REGISTER_DELEGATE:
+                case TX_COMMAND_ID_REGISTER_VALIDATOR:
                     items += 1 + (app_mode_expert() ? 3 : 0);
                     break;
-                case TX_COMMAND_ID_VOTE_DELEGATE:
+                case TX_COMMAND_ID_STAKE:
                     items += _getTxNumItems();
                     break;
-                case TX_COMMAND_ID_UNLOCK_TOKEN:
-                case TX_COMMAND_ID_REPORT_DELEGATE_MISBEHAVIOUR:
+                case TX_COMMAND_ID_UNLOCK:
+                case TX_COMMAND_ID_REPORT_MISBEHAVIOUR:
+                case TX_COMMAND_ID_CLAIM_REWARDS:
                     items += 0;
+                    break;
+                case TX_COMMAND_ID_CHANGE_COMMISSION:
+                    items += 1;
                     break;
                 default:
                     items = 0;
@@ -237,8 +241,8 @@ parser_error_t _read(parser_context_t *ctx, parser_tx_t *tx_obj) {
             CHECK_ERROR(parse_auth_module(ctx, tx_obj))
             break;
 
-        case TX_MODULE_ID_DPOS:
-            CHECK_ERROR(parse_dpos_module(ctx, tx_obj))
+        case TX_MODULE_ID_POS:
+            CHECK_ERROR(parse_pos_module(ctx, tx_obj))
             break;
 
         case TX_MODULE_ID_LEGACY:

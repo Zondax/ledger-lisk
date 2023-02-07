@@ -44,7 +44,7 @@ extern "C" {
 
 #define COIN_AMOUNT_DECIMAL_PLACES 8
 #define COIN_TICKER "LSK "
-#define UNVOTE_COIN_TICKER "LSK -"
+#define UNSTAKE_COIN_TICKER "LSK -"
 #define COIN_HRP "lsk"
 
 #define MENU_MAIN_APP_LINE1 "Lisk"

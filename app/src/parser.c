@@ -27,7 +27,7 @@
 
 #include "txn_token_module.h"
 #include "txn_auth_module.h"
-#include "txn_dpos_module.h"
+#include "txn_pos_module.h"
 #include "txn_legacy_module.h"
 
 #include "crypto.h"
@@ -151,20 +151,24 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
             return print_module_auth_reg(ctx, displayIdx, txDisplayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
 
-        case TX_MODULE_ID_DPOS:
+        case TX_MODULE_ID_POS:
             switch (ctx->tx_obj->command_id)
             {
-                case TX_COMMAND_ID_REGISTER_DELEGATE:
-                    return print_module_dpos_reg_delegate(ctx, displayIdx, outKey, outKeyLen,
+                case TX_COMMAND_ID_REGISTER_VALIDATOR:
+                    return print_module_pos_reg_validator(ctx, displayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
 
-                case TX_COMMAND_ID_VOTE_DELEGATE:
+                case TX_COMMAND_ID_STAKE:
                     CHECK_ERROR(getItem(displayIdx, &txDisplayIdx))
-                    return print_module_dpos_vote(ctx, displayIdx,  txDisplayIdx, outKey, outKeyLen,
+                    return print_module_pos_stake(ctx, displayIdx,  txDisplayIdx, outKey, outKeyLen,
                                        outVal, outValLen, pageIdx, pageCount);
 
-                case TX_COMMAND_ID_UNLOCK_TOKEN:
-                case TX_COMMAND_ID_REPORT_DELEGATE_MISBEHAVIOUR:
+                case TX_COMMAND_ID_CHANGE_COMMISSION:
+                    return print_module_pos_change_commission(ctx, displayIdx, outKey, outKeyLen,
+                                       outVal, outValLen, pageIdx, pageCount);
+                case TX_COMMAND_ID_UNLOCK:
+                case TX_COMMAND_ID_REPORT_MISBEHAVIOUR:
+                case TX_COMMAND_ID_CLAIM_REWARDS:
                 default:
                     return parser_unexpected_value; 
             }

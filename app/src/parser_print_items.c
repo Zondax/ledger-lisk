@@ -35,8 +35,8 @@ static parser_error_t print_module(uint32_t module_id, char *outKey,
       snprintf(outVal, outValLen, "auth");
       break;
 
-    case TX_MODULE_ID_DPOS:
-      snprintf(outVal, outValLen, "dpos");
+    case TX_MODULE_ID_POS:
+      snprintf(outVal, outValLen, "pos");
       break;
 
     case TX_MODULE_ID_LEGACY:
@@ -77,19 +77,25 @@ static parser_error_t print_command_id(uint32_t module_id, uint32_t command_id,
       snprintf(outVal, outValLen, "registerMultisignature");
       break;
 
-    case TX_MODULE_ID_DPOS:
+    case TX_MODULE_ID_POS:
         switch (command_id) {
-            case TX_COMMAND_ID_REGISTER_DELEGATE:
-                snprintf(outVal, outValLen, "registerDelegate");
+            case TX_COMMAND_ID_REGISTER_VALIDATOR:
+                snprintf(outVal, outValLen, "registerValidator");
                 break;
-            case TX_COMMAND_ID_VOTE_DELEGATE:
-                snprintf(outVal, outValLen, "vote");
+            case TX_COMMAND_ID_STAKE:
+                snprintf(outVal, outValLen, "stake");
                 break;
-            case TX_COMMAND_ID_UNLOCK_TOKEN:
+            case TX_COMMAND_ID_UNLOCK:
                 snprintf(outVal, outValLen, "unlock");
                 break;
-            case TX_COMMAND_ID_REPORT_DELEGATE_MISBEHAVIOUR:
+            case TX_COMMAND_ID_REPORT_MISBEHAVIOUR:
                 snprintf(outVal, outValLen, "reportMisbehavior");
+                break;
+            case TX_COMMAND_ID_CLAIM_REWARDS:
+                snprintf(outVal, outValLen, "claimRewards");
+                break;
+              case TX_COMMAND_ID_CHANGE_COMMISSION:
+                snprintf(outVal, outValLen, "changeCommission");
                 break;
             default:
                 return parser_unexpected_value;

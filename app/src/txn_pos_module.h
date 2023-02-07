@@ -22,18 +22,24 @@
 extern "C" {
 #endif
 
-parser_error_t parse_dpos_module(parser_context_t *ctx, parser_tx_t *tx_obj);
+parser_error_t parse_pos_module(parser_context_t *ctx, parser_tx_t *tx_obj);
 
-parser_error_t print_module_dpos_reg_delegate(const parser_context_t *ctx,
+parser_error_t print_module_pos_reg_validator(const parser_context_t *ctx,
                                   uint8_t displayIdx,
                                   char *outKey, uint16_t outKeyLen,
                                   char *outVal, uint16_t outValLen,
                                   uint8_t pageIdx, uint8_t *pageCount);
-parser_error_t print_module_dpos_vote(const parser_context_t *ctx,
+parser_error_t print_module_pos_stake(const parser_context_t *ctx,
                                   uint8_t displayIdx, uint8_t displayType,
                                   char *outKey, uint16_t outKeyLen,
                                   char *outVal, uint16_t outValLen,
                                   uint8_t pageIdx, uint8_t *pageCount);
+
+parser_error_t print_module_pos_change_commission(const parser_context_t *ctx,
+                                    uint8_t displayIdx,
+                                    char *outKey, uint16_t outKeyLen,
+                                    char *outVal, uint16_t outValLen,
+                                    uint8_t pageIdx, uint8_t *pageCount);
 
 #ifdef __cplusplus
 }

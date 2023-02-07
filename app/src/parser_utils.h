@@ -40,7 +40,7 @@ parser_error_t _toStringBalance(uint64_t *amount, uint8_t decimalPlaces,
                                 uint16_t outValueLen, uint8_t pageIdx,
                                 uint8_t *pageCount);
 
-parser_error_t _toStringVoteAmount(uint64_t *amount, char prefix[],
+parser_error_t _toStringStakeAmount(uint64_t *amount, char prefix[],
                                 char *outValue, uint16_t outValueLen, uint8_t pageIdx, 
                                 uint8_t *pageCount);
 
