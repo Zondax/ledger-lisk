@@ -190,10 +190,10 @@ parser_error_t print_module_pos_stake(const parser_context_t *ctx,
             uint32_t stake_offset = 0;
 
             for(uint8_t i = 0; i < tmpIdx; i++) {
-                stake_offset += DPOS_STAKE_SIZE_OFFSET + ctx->tx_obj->tx_command._pos_stake.stakeSize[i];
+                stake_offset += POS_STAKE_SIZE_OFFSET + ctx->tx_obj->tx_command._pos_stake.stakeSize[i];
             }
 
-            _encodeAddressHash((uint8_t*) &addr_str, sizeof(addr_str),ctx->tx_obj->tx_command._pos_stake.start + DPOS_STAKE_ADDRESS_OFFSET + stake_offset) ;
+            _encodeAddressHash((uint8_t*) &addr_str, sizeof(addr_str),ctx->tx_obj->tx_command._pos_stake.start + POS_STAKE_ADDRESS_OFFSET + stake_offset) ;
     
             snprintf(outKey, outKeyLen, "Stakes %d", tmpIdx);
             pageString(outVal, outValLen, (const char*) &addr_str, pageIdx, pageCount);

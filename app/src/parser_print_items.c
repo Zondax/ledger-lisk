@@ -43,6 +43,10 @@ static parser_error_t print_module(uint32_t module_id, char *outKey,
       snprintf(outVal, outValLen, "legacy");
       break;
 
+    case TX_MODULE_ID_INTEROP:
+      snprintf(outVal, outValLen, "interoperability");
+      break;
+
     default:
       return parser_display_idx_out_of_range;
   }
@@ -103,10 +107,46 @@ static parser_error_t print_command_id(uint32_t module_id, uint32_t command_id,
         break;
 
     case TX_MODULE_ID_LEGACY:
-        if (command_id != TX_COMMAND_ID_RECLAIM) {
-            return parser_unexpected_value;
+        switch (command_id) {
+          case TX_COMMAND_ID_RECLAIM:
+              snprintf(outVal, outValLen, "reclaimLSK");
+              break;
+          case TX_COMMAND_ID_REGISTER_KEYS:
+              snprintf(outVal, outValLen, "registerKeys");
+              break;
+          default:
+              return parser_unexpected_value;
         }
-        snprintf(outVal, outValLen, "reclaimLSK");
+        break;
+    case TX_MODULE_ID_INTEROP:
+        switch (command_id) {
+            case TX_COMMAND_ID_MAINCHAIN_CC_UPDATE:
+                snprintf(outVal, outValLen, "submitMainchainCrossChainUpdate");
+                break;
+            case TX_COMMAND_ID_SIDECHAIN_CC_UPDATE:
+                snprintf(outVal, outValLen, "submitSidechainCrossChainUpdate");
+                break;
+            case TX_COMMAND_ID_MAINCHAIN_REG:
+                snprintf(outVal, outValLen, "registerMainchain");
+                break;
+            case TX_COMMAND_ID_MSG_RECOVERY:
+                snprintf(outVal, outValLen, "recoverMessage");
+                break;
+            case TX_COMMAND_ID_MSG_RECOVERY_INIT:
+                snprintf(outVal, outValLen, "initializeMessageRecovery");
+                break;
+            case TX_COMMAND_ID_SIDECHAIN_REG:
+                snprintf(outVal, outValLen, "registerSidechain");
+                break;
+            case TX_COMMAND_ID_STATE_RECOVERY:
+                snprintf(outVal, outValLen, "recoverState");
+                break;
+            case TX_COMMAND_ID_STATE_RECOVERY_INIT:
+                snprintf(outVal, outValLen, "initializeStateRecovery");
+                break;
+            default:
+                return parser_unexpected_value;
+        }
         break;
 
     default:

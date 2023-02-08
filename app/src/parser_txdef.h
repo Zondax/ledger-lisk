@@ -47,14 +47,18 @@ extern "C" {
 #define MAX_NUMBER_SENT_STAKES 10
 #define BASE_STAKE_AMOUNT 1000000000
 #define BASE_STAKE_AMOUNT_DECIMALS 100000000
+#define SENDINGCHAIN_ID_LENGTH 4
+#define OWNCHAIN_ID_LENGTH 4
+#define INTEROP_CHAINID_LENGTH 4
 
 #define TX_MODULE_ID_TOKEN 0
 #define TX_MODULE_ID_AUTH 1
 #define TX_MODULE_ID_POS 2
 #define TX_MODULE_ID_LEGACY 3
+#define TX_MODULE_ID_INTEROP 4
 
-#define DPOS_STAKE_SIZE_OFFSET 2
-#define DPOS_STAKE_ADDRESS_OFFSET 4
+#define POS_STAKE_SIZE_OFFSET 2
+#define POS_STAKE_ADDRESS_OFFSET 4
 
 #define TX_COMMAND_ID_TRANSFER 0
 #define TX_COMMAND_ID_CROSSCHAIN_TRANSFER 1
@@ -66,6 +70,15 @@ extern "C" {
 #define TX_COMMAND_ID_CLAIM_REWARDS 4
 #define TX_COMMAND_ID_CHANGE_COMMISSION 5
 #define TX_COMMAND_ID_RECLAIM 0
+#define TX_COMMAND_ID_REGISTER_KEYS 1
+#define TX_COMMAND_ID_MAINCHAIN_CC_UPDATE 0
+#define TX_COMMAND_ID_SIDECHAIN_CC_UPDATE 1
+#define TX_COMMAND_ID_MAINCHAIN_REG 2
+#define TX_COMMAND_ID_MSG_RECOVERY 3
+#define TX_COMMAND_ID_MSG_RECOVERY_INIT 4
+#define TX_COMMAND_ID_SIDECHAIN_REG 5
+#define TX_COMMAND_ID_STATE_RECOVERY 6
+#define TX_COMMAND_ID_STATE_RECOVERY_INIT 7
 
 #define RECLAIM_AMOUNT_TYPE 0
 
@@ -104,6 +117,22 @@ typedef enum pos_reg_validator_fields {
   POS_REG_VALIDATOR_BLSKEY_TYPE,
   POS_REG_VALIDATOR_POP_TYPE, 
 } pos_reg_validator_fields;
+
+typedef enum interop_mainchain_reg_fields {
+  INTEROP_MAIN_REG_OWNCHAIN_ID_TYPE = 0,
+  INTEROP_MAIN_REG_OWNNAME_TYPE,
+} interop_mainchain_reg_fields;
+
+typedef enum interop_sidechain_reg_fields {
+  INTEROP_SIDE_REG_NAME_TYPE = 0,
+  INTEROP_SIDE_REG_CHAIN_ID_TYPE 
+} interop_sidechain_reg_fields;
+
+typedef enum legacy_registerKeys_fields {
+  LEGACY_REGISTER_KEYS_GENKEY_TYPE = 0,
+  LEGACY_REGISTER_KEYS_BLSKEY_TYPE,
+  LEGACY_REGISTER_KEYS_POP_TYPE, 
+} legacy_registerKeys_fields;
 
 typedef struct {
     char name[32];
@@ -177,6 +206,46 @@ typedef struct tx_command_legacy_token_reclaim {
   uint64_t amount;
 } tx_command_legacy_token_reclaim_t;
 
+typedef struct tx_command_legacy_register_keys {
+  const uint8_t *blskey;
+  const uint8_t *proofOfPossession;
+  const uint8_t *generatorKey;
+} tx_command_legacy_register_keys_t;
+
+typedef struct tx_command_interop_chain_cc_update {
+  const uint8_t *sendingChainID;
+} tx_command_interop_chain_cc_update_t;
+
+typedef struct tx_command_interop_mainchain_register {
+  const uint8_t *ownChainId;
+  const uint8_t *ownName;
+  uint8_t ownNameLen;
+} tx_command_interop_mainchain_register_t;
+
+typedef struct tx_command_interop_recover_msg {
+  const uint8_t *chainID;
+} tx_command_interop_recover_msg_t;
+
+typedef struct tx_command_interop_recover_msg_init {
+  const uint8_t *chainID;
+} tx_command_interop_recover_msg_init_t;
+
+typedef struct tx_command_interop_sidechain_register {
+  const uint8_t *chainID;
+  const uint8_t *name;
+  uint8_t nameLen;
+} tx_command_interop_sidechain_register_t;
+
+typedef struct tx_command_interop_recover_state {
+  const uint8_t *chainID;
+  const uint8_t *module;
+  uint8_t moduleLen;
+} tx_command_interop_recover_state_t;
+
+typedef struct tx_command_interop_recover_state_init {
+  const uint8_t *chainID;
+} tx_command_interop_recover_state_init_t;
+
 typedef union tx_command {
   tx_command_token_transfer_t _token_transfer;
   tx_command_token_crosschain_transfer_t _token_crosschain_transfer;
@@ -191,6 +260,15 @@ typedef union tx_command {
   tx_command_pos_change_commissions_t _pos_change_commissions;
 
   tx_command_legacy_token_reclaim_t _legacy_token_reclaim;
+  tx_command_legacy_register_keys_t _legacy_register_keys;
+
+  tx_command_interop_chain_cc_update_t _interop_chain_cc_update;
+  tx_command_interop_mainchain_register_t  _interop_mainchain_register;
+  tx_command_interop_recover_msg_t _interpo_recover_msg;
+  tx_command_interop_recover_msg_init_t _interpo_recover_msg_init;
+  tx_command_interop_sidechain_register_t _interop_sidechain_register;
+  tx_command_interop_recover_state_t _interop_recover_state;
+  tx_command_interop_recover_state_init_t _interop_recover_state_init;
 } tx_command_t;
 
 typedef struct{

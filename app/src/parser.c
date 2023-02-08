@@ -29,6 +29,7 @@
 #include "txn_auth_module.h"
 #include "txn_pos_module.h"
 #include "txn_legacy_module.h"
+#include "txn_interop_module.h"
 
 #include "crypto.h"
 #include "crypto_helper.h"
@@ -132,11 +133,9 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
     displayIdx-=common_items;
     uint8_t txDisplayIdx = 0;
     
-    switch (ctx->tx_obj->module_id)
-    {
+    switch (ctx->tx_obj->module_id) {
         case TX_MODULE_ID_TOKEN:
-            switch (ctx->tx_obj->command_id)
-            {
+            switch (ctx->tx_obj->command_id) {
                 case TX_COMMAND_ID_TRANSFER:
                     return print_module_token_transfer(ctx, displayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
@@ -152,8 +151,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
                                       outVal, outValLen, pageIdx, pageCount);
 
         case TX_MODULE_ID_POS:
-            switch (ctx->tx_obj->command_id)
-            {
+            switch (ctx->tx_obj->command_id) {
                 case TX_COMMAND_ID_REGISTER_VALIDATOR:
                     return print_module_pos_reg_validator(ctx, displayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
@@ -174,8 +172,40 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
             }
 
         case TX_MODULE_ID_LEGACY:
-            return print_module_legacy_reclaim(ctx, displayIdx, outKey, outKeyLen,
-                                outVal, outValLen, pageIdx, pageCount);
+            switch (ctx->tx_obj->command_id) {
+                case TX_COMMAND_ID_RECLAIM:
+                    return print_module_legacy_reclaim(ctx, displayIdx, outKey, outKeyLen,
+                                        outVal, outValLen, pageIdx, pageCount);
+                case TX_COMMAND_ID_REGISTER_KEYS:
+                    return print_module_legacy_register_keys(ctx, displayIdx, outKey, outKeyLen,
+                        outVal, outValLen, pageIdx, pageCount);
+                                default:
+                    return parser_unexpected_value; 
+            }
+
+        case TX_MODULE_ID_INTEROP:
+            switch (ctx->tx_obj->command_id) {
+                case TX_COMMAND_ID_MAINCHAIN_CC_UPDATE:
+                case TX_COMMAND_ID_SIDECHAIN_CC_UPDATE:
+                    return print_module_interop_CCupdate(ctx, displayIdx, outKey, outKeyLen,
+                                      outVal, outValLen, pageIdx, pageCount);
+                case TX_COMMAND_ID_MAINCHAIN_REG:
+                    return print_module_mainchain_register(ctx, displayIdx, outKey, outKeyLen,
+                                      outVal, outValLen, pageIdx, pageCount);
+                case TX_COMMAND_ID_MSG_RECOVERY:
+                case TX_COMMAND_ID_MSG_RECOVERY_INIT:
+                case TX_COMMAND_ID_STATE_RECOVERY_INIT:
+                    return print_module_interop_chainID(ctx, displayIdx, outKey, outKeyLen,
+                                      outVal, outValLen, pageIdx, pageCount);
+                case TX_COMMAND_ID_STATE_RECOVERY:
+                    return print_module_state_recover(ctx, displayIdx, outKey, outKeyLen,
+                                      outVal, outValLen, pageIdx, pageCount);
+                case TX_COMMAND_ID_SIDECHAIN_REG:
+                return print_module_sidechain_register(ctx, displayIdx, outKey, outKeyLen,
+                                      outVal, outValLen, pageIdx, pageCount);
+                default:
+                    return parser_unexpected_value; 
+            }
         
         default:
             return parser_unexpected_value;

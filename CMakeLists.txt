@@ -122,6 +122,7 @@ file(GLOB_RECURSE LIB_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/txn_auth_module.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/txn_pos_module.c
         ${CMAKE_CURRENT_SOURCE_DIR}/app/src/txn_legacy_module.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/app/src/txn_interop_module.c
         ${CMAKE_CURRENT_SOURCE_DIR}/deps/picohash/
         )
 
