@@ -59,7 +59,7 @@ const hdpath = `m/44'/134'/0/0/0`
 jest.setTimeout(300000)
 
 describe('Custom', function () {
-  test.each(models)('can start and stop container', async function (m) {
+  test.concurrent.each(models)('can start and stop container', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -68,7 +68,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign message', async function (m) {
+  test.concurrent.each(models)('sign message', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -101,7 +101,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign message - non printable', async function (m) {
+  test.concurrent.each(models)('sign message - non printable', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -134,7 +134,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign token transfer', async function (m) {
+  test.concurrent.each(models)('sign token transfer', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -166,7 +166,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign token transfer expert', async function (m) {
+  test.concurrent.each(models)('sign token transfer expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -203,7 +203,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign crosschain transfer', async function (m) {
+  test.concurrent.each(models)('sign crosschain transfer', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -235,7 +235,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign crosschain transfer expert', async function (m) {
+  test.concurrent.each(models)('sign crosschain transfer expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -272,7 +272,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign register multisignature', async function (m) {
+  test.concurrent.each(models)('sign register multisignature', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -304,7 +304,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign register multisignature expert', async function (m) {
+  test.concurrent.each(models)('sign register multisignature expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -341,7 +341,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign pos register validator', async function (m) {
+  test.concurrent.each(models)('sign pos register validator', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -373,7 +373,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign pos register validator expert', async function (m) {
+  test.concurrent.each(models)('sign pos register validator expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -410,7 +410,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign pos stake', async function (m) {
+  test.concurrent.each(models)('sign pos stake', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -442,7 +442,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign pos stake expert', async function (m) {
+  test.concurrent.each(models)('sign pos stake expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -479,7 +479,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign pos unlock', async function (m) {
+  test.concurrent.each(models)('sign pos unlock', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -511,7 +511,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign pos unlock expert', async function (m) {
+  test.concurrent.each(models)('sign pos unlock expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -548,7 +548,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign pos report misbehavior', async function (m) {
+  test.concurrent.each(models)('sign pos report misbehavior', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -580,7 +580,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign report mish expert', async function (m) {
+  test.concurrent.each(models)('sign report mish expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -617,7 +617,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign legacy reclaim', async function (m) {
+  test.concurrent.each(models)('sign legacy reclaim', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -649,7 +649,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign legacy reclaim expert', async function (m) {
+  test.concurrent.each(models)('sign legacy reclaim expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -686,7 +686,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign legacy register keys', async function (m) {
+  test.concurrent.each(models)('sign legacy register keys', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -718,7 +718,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign legacy register keys expert', async function (m) {
+  test.concurrent.each(models)('sign legacy register keys expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -755,7 +755,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop mainchain CC update', async function (m) {
+  test.concurrent.each(models)('sign interop mainchain CC update', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -787,7 +787,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop mainchain CC update expert', async function (m) {
+  test.concurrent.each(models)('sign interop mainchain CC update expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -824,7 +824,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop sidechain CC update', async function (m) {
+  test.concurrent.each(models)('sign interop sidechain CC update', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -856,7 +856,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop sidechain CC update expert', async function (m) {
+  test.concurrent.each(models)('sign interop sidechain CC update expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -893,7 +893,7 @@ describe('Custom', function () {
     }
   })
 
- test.each(models)('sign interop main register', async function (m) {
+ test.concurrent.each(models)('sign interop main register', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -925,7 +925,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop mainchain register expert', async function (m) {
+  test.concurrent.each(models)('sign interop mainchain register expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -962,7 +962,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop sidechain register', async function (m) {
+  test.concurrent.each(models)('sign interop sidechain register', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -994,7 +994,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop sidechain register expert', async function (m) {
+  test.concurrent.each(models)('sign interop sidechain register expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -1031,7 +1031,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop msg recovery', async function (m) {
+  test.concurrent.each(models)('sign interop msg recovery', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -1063,7 +1063,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop msg recovery expert', async function (m) {
+  test.concurrent.each(models)('sign interop msg recovery expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -1100,7 +1100,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop msg recovery init', async function (m) {
+  test.concurrent.each(models)('sign interop msg recovery init', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -1132,7 +1132,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop msg recovery init expert', async function (m) {
+  test.concurrent.each(models)('sign interop msg recovery init expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -1169,7 +1169,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop state recovery', async function (m) {
+  test.concurrent.each(models)('sign interop state recovery', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -1201,7 +1201,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop state recovery expert', async function (m) {
+  test.concurrent.each(models)('sign interop state recovery expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -1238,7 +1238,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop state recovery init', async function (m) {
+  test.concurrent.each(models)('sign interop state recovery init', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
@@ -1270,7 +1270,7 @@ describe('Custom', function () {
     }
   })
 
-  test.each(models)('sign interop state recovery init expert', async function (m) {
+  test.concurrent.each(models)('sign interop state recovery init expert', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
