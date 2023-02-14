@@ -36,6 +36,23 @@
 
 #include "app_mode.h"
 
+#define PRINT_STANDARD_FIELDS(denom1, f1, f1_len, denom2, f2, f2_len) { \
+    *pageCount = 1; \
+    char buf[DATA_MAX_LENGTH] = {0}; \
+    switch (displayIdx) { \
+        case INTEROP_MAIN_REG_OWNCHAIN_ID_TYPE: \
+            snprintf(outKey, outKeyLen, denom1); \
+            array_to_hexstr(buf, sizeof(buf), f1, f1_len); \
+            pageString(outVal, outValLen, (const char*) &buf, pageIdx, pageCount); \
+            return parser_ok; \
+        case INTEROP_MAIN_REG_OWNNAME_TYPE: \
+            MEMCPY(buf, f2, f2_len); \
+            snprintf(outKey, outKeyLen, denom2); \
+            pageString(outVal, outValLen, buf, pageIdx, pageCount); \
+            return parser_ok; \
+        default: \
+            break;}}
+
 
 parser_error_t parser_init_context(parser_context_t *ctx,
                                    const uint8_t *buffer,
@@ -132,7 +149,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
 
     displayIdx-=common_items;
     uint8_t txDisplayIdx = 0;
-    
+
     switch (ctx->tx_obj->module_id) {
         case TX_MODULE_ID_TOKEN:
             switch (ctx->tx_obj->command_id) {
@@ -143,7 +160,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
                     return print_module_token_cross(ctx, displayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
                 default:
-                    return parser_unexpected_value; 
+                    return parser_unexpected_value;
             }
         case TX_MODULE_ID_AUTH:
             CHECK_ERROR(getItem(displayIdx, &txDisplayIdx))
@@ -168,7 +185,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
                 case TX_COMMAND_ID_REPORT_MISBEHAVIOUR:
                 case TX_COMMAND_ID_CLAIM_REWARDS:
                 default:
-                    return parser_unexpected_value; 
+                    return parser_unexpected_value;
             }
 
         case TX_MODULE_ID_LEGACY:
@@ -180,7 +197,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
                     return print_module_legacy_register_keys(ctx, displayIdx, outKey, outKeyLen,
                         outVal, outValLen, pageIdx, pageCount);
                                 default:
-                    return parser_unexpected_value; 
+                    return parser_unexpected_value;
             }
 
         case TX_MODULE_ID_INTEROP:
@@ -190,23 +207,25 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
                     return print_module_interop_CCupdate(ctx, displayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
                 case TX_COMMAND_ID_MAINCHAIN_REG:
-                    return print_module_mainchain_register(ctx, displayIdx, outKey, outKeyLen,
-                                      outVal, outValLen, pageIdx, pageCount);
+                    PRINT_STANDARD_FIELDS("OwnChainID", ctx->tx_obj->tx_command._interop_mainchain_register.ownChainId, OWNCHAIN_ID_LENGTH,
+                                          "OwnName", ctx->tx_obj->tx_command._interop_mainchain_register.ownName,
+                                          ctx->tx_obj->tx_command._interop_mainchain_register.ownNameLen);
                 case TX_COMMAND_ID_MSG_RECOVERY:
                 case TX_COMMAND_ID_MSG_RECOVERY_INIT:
                 case TX_COMMAND_ID_STATE_RECOVERY_INIT:
                     return print_module_interop_chainID(ctx, displayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
                 case TX_COMMAND_ID_STATE_RECOVERY:
-                    return print_module_state_recover(ctx, displayIdx, outKey, outKeyLen,
-                                      outVal, outValLen, pageIdx, pageCount);
+                    PRINT_STANDARD_FIELDS("ChainID", ctx->tx_obj->tx_command._interop_recover_state.chainID, OWNCHAIN_ID_LENGTH,
+                                          "Module", ctx->tx_obj->tx_command._interop_recover_state.module,
+                                          ctx->tx_obj->tx_command._interop_recover_state.moduleLen);
                 case TX_COMMAND_ID_SIDECHAIN_REG:
-                return print_module_sidechain_register(ctx, displayIdx, outKey, outKeyLen,
+                    return print_module_sidechain_register(ctx, displayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
                 default:
-                    return parser_unexpected_value; 
+                    return parser_unexpected_value;
             }
-        
+
         default:
             return parser_unexpected_value;
 
@@ -214,4 +233,3 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
 
     return parser_display_idx_out_of_range;
 }
-

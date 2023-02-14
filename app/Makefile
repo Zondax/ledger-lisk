@@ -38,10 +38,6 @@ include $(CURDIR)/Makefile.version
 
 $(info COIN  = [$(COIN)])
 
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-APP_STACK_SIZE:=2800
-endif
-
 ifeq ($(COIN),LSK)
 # Main app configuration
 DEFINES += APP_STANDARD
@@ -63,7 +59,7 @@ endif
 APP_LOAD_PARAMS =  --delete $(COMMON_LOAD_PARAMS) --path $(APPPATH)
 DEFINES += HAVE_PENDING_REVIEW_SCREEN
 
-NANOS_STACK_SIZE := $(APP_STACK_SIZE)
+NANOS_STACK_SIZE := 2800
 
 include $(CURDIR)/../deps/ledger-zxlib/makefiles/Makefile.devices
 

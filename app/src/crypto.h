@@ -26,6 +26,8 @@ extern "C" {
 #include "zxerror.h"
 
 #define MAX_BIP32_PATH 10
+#define MIN_LISK_HDPATH 3
+
 typedef struct hdpath {
     uint32_t path[MAX_BIP32_PATH];
     uint8_t pathLength;

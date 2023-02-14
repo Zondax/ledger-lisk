@@ -43,12 +43,14 @@ if( os_global_pin_is_validated() != BOLOS_UX_OK ) { \
 static bool tx_initialized = false;
 
 void extractHDPath(uint32_t rx, uint32_t offset) {
+    MEMZERO(hdPath.path, sizeof(hdPath.path));
     tx_initialized = false;
 
     const uint8_t pathLength = G_io_apdu_buffer[offset];
     offset++;
 
-    if ((rx - offset) < sizeof(uint32_t) * pathLength || pathLength > MAX_BIP32_PATH) {
+    if ((rx - offset) < sizeof(uint32_t) * pathLength || pathLength > MAX_BIP32_PATH
+        || pathLength < MIN_LISK_HDPATH) {
         THROW(APDU_CODE_WRONG_LENGTH);
     }
     hdPath.pathLength = pathLength;
