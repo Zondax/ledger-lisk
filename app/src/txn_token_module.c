@@ -48,7 +48,7 @@ static parser_error_t parse_transfer(parser_context_t *ctx, tx_command_token_tra
 
     // Read data length and data
     GET_KEY_AND_VARUINT(ctx, tmp64);
-    if (tmp64 == 0 || tmp64 > DATA_MAX_LENGTH) {
+    if (tmp64 > DATA_MAX_LENGTH) {
         return parser_value_out_of_range;
     }
     transfer->dataLength=tmp64;
@@ -92,7 +92,7 @@ static parser_error_t parse_crosschain_transfer(parser_context_t *ctx, tx_comman
 
     // Read data length and data
     GET_KEY_AND_VARUINT(ctx, tmp64);
-    if (tmp64 == 0 || tmp64 > DATA_MAX_LENGTH) {
+    if (tmp64 > DATA_MAX_LENGTH) {
         return parser_value_out_of_range;
     }
     transfer->dataLength = tmp64;
