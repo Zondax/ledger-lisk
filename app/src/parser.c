@@ -71,11 +71,34 @@ parser_error_t parser_init_context(parser_context_t *ctx,
     return parser_ok;
 }
 
+parser_error_t parser_get_tag_chain(parser_context_t *ctx, parser_tx_t *tx_obj) {
+    if (MEMCMP(ctx->buffer, TAG_INIT, strlen(TAG_INIT)) != 0) {
+        return parser_unexpected_tag_init;
+    }
+    ctx->offset += strlen(TAG_INIT);
+
+    while (ctx->offset < ctx->bufferLen) {
+        if ( *(ctx->buffer + ctx->offset) == '_') {
+            ctx->offset++;
+            break;
+        }
+        ctx->offset++;
+    }
+
+    if(ctx->offset >= ctx->bufferLen) {
+        return parser_unexpected_tag_init;
+    }
+    ctx->offset += CHAIN_ID_LENGTH;
+    return parser_ok;
+}
+
 parser_error_t parser_parse(parser_context_t *ctx,
                             const uint8_t *data,
                             size_t dataLen,
                             parser_tx_t *tx_obj) {
     CHECK_ERROR(parser_init_context(ctx, data, dataLen))
+    CHECK_ERROR(parser_get_tag_chain(ctx, tx_obj))
+
     ctx->tx_obj = tx_obj;
     return _read(ctx, tx_obj);
 }

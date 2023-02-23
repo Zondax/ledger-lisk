@@ -332,7 +332,8 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "display index out of range";
         case parser_display_page_out_of_range:
             return "display page out of range";
-
+        case parser_unexpected_tag_init:
+            return "Unexpected tag init";
         default:
             return "Unrecognized error code";
     }
