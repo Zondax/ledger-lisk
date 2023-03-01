@@ -158,7 +158,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -195,7 +197,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -227,7 +231,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -264,7 +270,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -296,7 +304,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -333,7 +343,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -365,7 +377,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -402,7 +416,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -434,7 +450,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -471,7 +489,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -503,7 +523,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -540,7 +562,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -572,7 +596,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -609,7 +635,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -641,7 +669,10 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      console.log(msgHash)
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -678,7 +709,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -710,7 +743,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -747,7 +782,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -779,7 +816,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -816,7 +855,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -848,7 +889,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -885,7 +928,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -917,7 +962,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -954,7 +1001,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -986,7 +1035,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -1023,7 +1074,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -1055,7 +1108,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -1092,7 +1147,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -1124,7 +1181,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -1161,7 +1220,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -1193,7 +1254,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -1230,7 +1293,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -1262,7 +1327,9 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
@@ -1299,7 +1366,11 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const valid = ed25519.verify(signatureResponse.signature, txBlob, pubKey)
+      const hash = crypto.createHash('sha256')
+      const msgHash = hash.update(txBlob).digest()
+      console.log(msgHash)
+
+      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
       expect(valid).toEqual(true)
       console.log(valid)
     } finally {
