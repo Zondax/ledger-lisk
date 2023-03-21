@@ -15,7 +15,6 @@
  ******************************************************************************* */
 
 import Zemu, { DEFAULT_START_OPTIONS } from '@zondax/zemu'
-// @ts-ignore
 import { LiskApp } from '@zondax/ledger-lisk'
 import { APP_SEED, models } from './common'
 
@@ -26,7 +25,7 @@ const defaultOptions = {
   X11: false,
 }
 
-const hdpath = `m/44'/134'/0/0/0`
+const hdpath = `m/44'/134'/0'`
 
 jest.setTimeout(180000)
 
@@ -83,8 +82,8 @@ describe('Standard', function () {
       expect(response.return_code).toEqual(0x9000)
       expect(response.error_message).toEqual('No errors')
 
-      const expected_pk = 'cbc23486224ab599b62c7e8387ddd9c29c9b024bb46034b3a39b193bc3de78cb'
-      const expected_address = 'lskw3yr8azweujx4ecvb3hd2ddd3d47ygcyrxrrpw'
+      const expected_pk = 'bdc868bd29b8b1f4c19f0dd1d444aa649797f8aa3b255bf01e61ca462f059ce7'
+      const expected_address = 'lskdfud7huub5mp75rh966com9fhoa4jq9hesshbp'
 
       expect(response.pubKey).toEqual(expected_pk)
       expect(response.address).toEqual(expected_address)

@@ -15,7 +15,6 @@
  ******************************************************************************* */
 
 import Zemu, { DEFAULT_START_OPTIONS } from '@zondax/zemu'
-// @ts-ignore
 import { LiskApp } from '@zondax/ledger-lisk'
 import {
   APP_SEED,
@@ -41,10 +40,9 @@ import {
   tx_interop_state_recovery_init,
 } from './common'
 
-// @ts-ignore
+// @ts-expect-error
 import ed25519 from 'ed25519-supercop'
 
-// @ts-ignore
 import crypto from 'crypto'
 
 const defaultOptions = {
@@ -54,7 +52,7 @@ const defaultOptions = {
   X11: false,
 }
 
-const hdpath = `m/44'/134'/0/0/0`
+const hdpath = `m/44'/134'/0'`
 
 jest.setTimeout(300000)
 
@@ -938,7 +936,7 @@ describe('Custom', function () {
     }
   })
 
- test.concurrent.each(models)('sign interop main register', async function (m) {
+  test.concurrent.each(models)('sign interop main register', async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
