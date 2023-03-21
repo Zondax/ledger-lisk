@@ -49,8 +49,7 @@ void extractHDPath(uint32_t rx, uint32_t offset) {
     const uint8_t pathLength = G_io_apdu_buffer[offset];
     offset++;
 
-    if ((rx - offset) < sizeof(uint32_t) * pathLength || pathLength > MAX_BIP32_PATH
-        || pathLength < MIN_LISK_HDPATH) {
+    if ((rx - offset) < sizeof(uint32_t) * pathLength || pathLength != LISK_HDPATH_LEN) {
         THROW(APDU_CODE_WRONG_LENGTH);
     }
     hdPath.pathLength = pathLength;

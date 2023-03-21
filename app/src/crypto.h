@@ -25,11 +25,10 @@ extern "C" {
 #include <sigutils.h>
 #include "zxerror.h"
 
-#define MAX_BIP32_PATH 10
-#define MIN_LISK_HDPATH 3
+#define LISK_HDPATH_LEN 3
 
 typedef struct hdpath {
-    uint32_t path[MAX_BIP32_PATH];
+    uint32_t path[LISK_HDPATH_LEN];
     uint8_t pathLength;
 } hdpath_t;
 
