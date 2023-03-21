@@ -1,21 +1,21 @@
-import {LedgerError} from "./common";
+import { LedgerError } from "./common";
 
 export interface ResponseBase {
-  error_message: string
-  return_code: number
+  error_message: string;
+  return_code: number;
 }
 
 export interface ResponseAddress extends ResponseBase {
-  pubKey: string
-  address: string
+  pubKey: string;
+  address: string;
 }
 
 export interface ResponseVersion extends ResponseBase {
-  device_locked: boolean
-  major: number
-  minor: number
-  patch: number
-  test_mode: boolean
+  device_locked: boolean;
+  major: number;
+  minor: number;
+  patch: number;
+  test_mode: boolean;
 }
 
 export interface ResponseAppInfo extends ResponseBase {
@@ -37,5 +37,5 @@ export interface ResponseDeviceInfo extends ResponseBase {
 }
 
 export interface ResponseSign extends ResponseBase {
-  signature: Buffer
+  signature: Buffer;
 }
