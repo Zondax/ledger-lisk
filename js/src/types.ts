@@ -1,5 +1,3 @@
-import { LedgerError } from "./common";
-
 export interface ResponseBase {
   error_message: string;
   return_code: number;

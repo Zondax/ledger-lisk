@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ******************************************************************************* */
-import Transport from "@ledgerhq/hw-transport";
+import type Transport from "@ledgerhq/hw-transport";
 import { CLA, INS } from "./config";
 
 export const CHUNK_SIZE = 250;
@@ -132,16 +132,9 @@ export function processErrorResponse(response?: any) {
 }
 
 export async function getVersion(transport: Transport) {
-  return transport.send(CLA, INS.GET_VERSION, 0, 0).then((response) => {
-    const errorCodeData = response.slice(-2);
+  return await transport.send(CLA, INS.GET_VERSION, 0, 0).then((response) => {
+    const errorCodeData = response.subarray(-2);
     const returnCode = (errorCodeData[0] * 256 + errorCodeData[1]) as LedgerError;
-
-    let targetId = 0;
-    if (response.length >= 9) {
-      /* eslint-disable no-bitwise */
-      targetId = (response[5] << 24) + (response[6] << 16) + (response[7] << 8) + (response[8] << 0);
-      /* eslint-enable no-bitwise */
-    }
 
     return {
       deviceLocked: response[4] === 1,
