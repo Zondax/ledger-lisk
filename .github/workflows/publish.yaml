@@ -12,15 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           submodules: true
       - name: Install node
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14.17.0'
-          registry-url: "https://registry.npmjs.org"
-          scope: "@zondax"
+        uses: actions/setup-node@v3
       - name: Install yarn
         run: npm install -g yarn
       - name: Build package
