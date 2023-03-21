@@ -56,7 +56,7 @@ endef
 $(error "$(error_message)")
 endif
 
-APP_LOAD_PARAMS =  --delete $(COMMON_LOAD_PARAMS) --path $(APPPATH)
+APP_LOAD_PARAMS = --curve ed25519 $(COMMON_LOAD_PARAMS) --path $(APPPATH)
 DEFINES += HAVE_PENDING_REVIEW_SCREEN
 
 NANOS_STACK_SIZE := 2800
@@ -73,12 +73,6 @@ endif
 include $(CURDIR)/../deps/ledger-zxlib/makefiles/Makefile.platform
 LDFLAGS += -z muldefs
 CFLAGS += -Wvla
-
-APP_SOURCE_PATH += $(MY_DIR)/src
-APP_SOURCE_PATH += $(MY_DIR)/glyphs
-APP_SOURCE_PATH += $(MY_DIR)/../deps/ledger-zxlib/include
-APP_SOURCE_PATH += $(MY_DIR)/../deps/ledger-zxlib/src
-APP_SOURCE_PATH += $(MY_DIR)/../deps/ledger-zxlib/app/common
 
 .PHONY: rust
 rust:
