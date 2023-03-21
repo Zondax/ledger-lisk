@@ -150,47 +150,36 @@ export async function getVersion(transport: Transport) {
 }
 
 const HARDENED = 0x80000000;
-const DEFAULT_DER_PATH_LEN = 6;
-const IDENTITY_DER_PATH_LEN = 4; // m/888'/0'/<account>
+const DER_PATH_LEN = 4;
 
 export function serializePath(path: string) {
   if (!path.startsWith("m")) {
-    throw new Error(`Path should start with "m" (e.g "m/44'/5757'/5'/0/3")`);
+    throw new Error(`Path should start with "m" (e.g "m/44'/134'/5'")`);
   }
 
   const pathArray = path.split("/");
 
   let allocSize = 0;
 
-  if (pathArray.length === DEFAULT_DER_PATH_LEN || pathArray.length === IDENTITY_DER_PATH_LEN) {
-    allocSize = (pathArray.length - 1) * 4 + 1;
-  } else {
-    throw new Error(`Invalid path. (e.g "m/44'/134'/0/0/0"`);
-  }
+  if (pathArray.length !== DER_PATH_LEN) throw new Error(`Invalid path length. (e.g "m/44'/134'/0'")`);
+  allocSize = (pathArray.length - 1) * 4 + 1;
 
   const buf = Buffer.alloc(allocSize);
   buf.writeUInt8(pathArray.length - 1, 0);
 
   for (let i = 1; i < pathArray.length; i += 1) {
-    let value = 0;
-    let child = pathArray[i];
-    if (child.endsWith("'")) {
-      value += HARDENED;
-      child = child.slice(0, -1);
-    }
+    if (!pathArray[i].endsWith("'")) throw new Error(`All path components need to be hardened. (e.g "m/44'/134'/0'")`);
+    const child = pathArray[i].slice(0, -1);
 
     const childNumber = Number(child);
 
     if (Number.isNaN(childNumber)) {
-      throw new Error(`Invalid path : ${child} is not a number. (e.g "m/44'/461'/5'/0/3")`);
+      throw new Error(`Invalid path : ${child} is not a number. (e.g "m/44'/134'/5'")`);
     }
 
-    if (childNumber >= HARDENED) {
-      throw new Error("Incorrect child value (bigger or equal to 0x80000000)");
-    }
+    if (childNumber >= HARDENED) throw new Error("Incorrect child value (bigger or equal to 0x80000000)");
 
-    value += childNumber;
-
+    const value = HARDENED + childNumber;
     buf.writeUInt32LE(value, 4 * (i - 1) + 1);
   }
 
