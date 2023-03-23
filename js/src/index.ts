@@ -16,6 +16,7 @@
  ******************************************************************************* */
 import type Transport from "@ledgerhq/hw-transport";
 import {
+  type ResponseMultipleAddresses,
   type ResponseAddress,
   type ResponseAppInfo,
   type ResponseDeviceInfo,
@@ -186,8 +187,24 @@ export class LiskApp {
   async getAddressAndPubKey(path: string): Promise<ResponseAddress> {
     const serializedPath = serializePath(path);
     return await this.transport
-      .send(CLA, INS.GET_ADDR_PUBKEY, P1_VALUES.ONLY_RETRIEVE, 0, serializedPath, [0x9000])
+      .send(CLA, INS.GET_ADDR_PUBKEY, P1_VALUES.ONLY_RETRIEVE, 0, serializedPath, [LedgerError.NoErrors])
       .then(processGetAddrResponse, processErrorResponse);
+  }
+
+  async getMultipleAddresses(indexes: number[]): Promise<ResponseMultipleAddresses> {
+    if (indexes.length === 0) throw new Error("Indexes array must not be empty");
+    const addresses: ResponseMultipleAddresses = {
+      return_code: LedgerError.NoErrors,
+      error_message: errorCodeToString(LedgerError.NoErrors),
+      addr: {},
+    };
+    for (const index of indexes) {
+      const addr = await this.getAddressAndPubKey(`m/44'/134'/${index}'`);
+      if (addr.return_code !== LedgerError.NoErrors)
+        return { return_code: addr.return_code, error_message: addr.error_message, addr: [] };
+      addresses.addr[index] = { pubKey: addr.pubKey, address: addr.address };
+    }
+    return addresses;
   }
 
   async showAddressAndPubKey(path: string): Promise<ResponseAddress> {

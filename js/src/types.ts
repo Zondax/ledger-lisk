@@ -8,6 +8,15 @@ export interface ResponseAddress extends ResponseBase {
   address: string;
 }
 
+interface Address {
+  pubKey: string;
+  address: string;
+}
+
+export interface ResponseMultipleAddresses extends ResponseBase {
+  addr: Record<number, Address>;
+}
+
 export interface ResponseVersion extends ResponseBase {
   device_locked: boolean;
   major: number;
