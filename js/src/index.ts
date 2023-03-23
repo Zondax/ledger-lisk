@@ -139,49 +139,44 @@ export class LiskApp {
   }
 
   async deviceInfo(): Promise<ResponseDeviceInfo> {
-    return await this.transport.send(0xe0, 0x01, 0, 0, Buffer.from([]), [0x6e00]).then((response) => {
-      const errorCodeData = response.subarray(-2);
-      const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
+    return await this.transport
+      .send(0xe0, 0x01, 0, 0, Buffer.from([]), [LedgerError.NoErrors, LedgerError.AppDoesNotSeemToBeOpen])
+      .then((response) => {
+        const errorCodeData = response.subarray(-2);
+        const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
 
-      if (returnCode === 0x6e00) {
+        const targetId = response.subarray(0, 4).toString("hex");
+
+        let pos = 4;
+        const secureElementVersionLen = response[pos];
+        pos += 1;
+        const seVersion = response.subarray(pos, pos + secureElementVersionLen).toString();
+        pos += secureElementVersionLen;
+
+        const flagsLen = response[pos];
+        pos += 1;
+        const flag = response.subarray(pos, pos + flagsLen).toString("hex");
+        pos += flagsLen;
+
+        const mcuVersionLen = response[pos];
+        pos += 1;
+        // Patch issue in mcu version
+        let tmp = response.subarray(pos, pos + mcuVersionLen);
+        if (tmp[mcuVersionLen - 1] === 0) {
+          tmp = response.subarray(pos, pos + mcuVersionLen - 1);
+        }
+        const mcuVersion = tmp.toString();
+
         return {
+          targetId,
+          seVersion,
+          flag,
+          mcuVersion,
+
           return_code: returnCode,
-          error_message: "This command is only available in the Dashboard",
+          error_message: errorCodeToString(returnCode),
         };
-      }
-
-      const targetId = response.subarray(0, 4).toString("hex");
-
-      let pos = 4;
-      const secureElementVersionLen = response[pos];
-      pos += 1;
-      const seVersion = response.subarray(pos, pos + secureElementVersionLen).toString();
-      pos += secureElementVersionLen;
-
-      const flagsLen = response[pos];
-      pos += 1;
-      const flag = response.subarray(pos, pos + flagsLen).toString("hex");
-      pos += flagsLen;
-
-      const mcuVersionLen = response[pos];
-      pos += 1;
-      // Patch issue in mcu version
-      let tmp = response.subarray(pos, pos + mcuVersionLen);
-      if (tmp[mcuVersionLen - 1] === 0) {
-        tmp = response.subarray(pos, pos + mcuVersionLen - 1);
-      }
-      const mcuVersion = tmp.toString();
-
-      return {
-        targetId,
-        seVersion,
-        flag,
-        mcuVersion,
-
-        return_code: returnCode,
-        error_message: errorCodeToString(returnCode),
-      };
-    }, processErrorResponse);
+      }, processErrorResponse);
   }
 
   async getAddressAndPubKey(path: string): Promise<ResponseAddress> {
