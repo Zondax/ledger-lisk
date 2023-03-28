@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2020",
     "strict": true,
     "esModuleInterop": true,
     "declaration": true,
@@ -8,8 +10,6 @@
     "skipLibCheck": true,
     "outDir": "./dist"
   },
-  "exclude": [
-    "node_modules",
-    "./dist/**"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }

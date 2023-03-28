@@ -25,7 +25,6 @@ ifeq ($(BOLOS_SDK),)
 # In this case, there is not predefined SDK and we run dockerized
 # When not using the SDK, we override and build the XL complete app
 
-SUBSTRATE_PARSER_FULL ?= 1
 include $(CURDIR)/deps/ledger-zxlib/dockerized_build.mk
 
 else
@@ -38,5 +37,5 @@ endif
 
 test_all:
 	make zemu_install
-	make clean_build && make
+	make
 	make zemu_test

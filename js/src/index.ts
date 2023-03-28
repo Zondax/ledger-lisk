@@ -14,8 +14,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ******************************************************************************* */
-import Transport from "@ledgerhq/hw-transport";
-import {ResponseAddress, ResponseAppInfo, ResponseDeviceInfo, ResponseSign, ResponseVersion} from "./types";
+import type Transport from "@ledgerhq/hw-transport";
+import {
+  type ResponseMultipleAddresses,
+  type ResponseAddress,
+  type ResponseAppInfo,
+  type ResponseDeviceInfo,
+  type ResponseSign,
+  type ResponseVersion,
+} from "./types";
 import {
   CHUNK_SIZE,
   ERROR_CODE,
@@ -27,28 +34,28 @@ import {
   processErrorResponse,
   serializePath,
 } from "./common";
-import {CLA, INS, PKLEN} from "./config";
+import { CLA, INS, PKLEN } from "./config";
 
-export {LedgerError};
+export { LedgerError };
 export * from "./types";
 
 function processGetAddrResponse(response: Buffer) {
-  const errorCodeData = response.slice(-2);
-  const returnCode = (errorCodeData[0] * 256 + errorCodeData[1]);
+  const errorCodeData = response.subarray(-2);
+  const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
 
-  const pubKey = response.slice(0, PKLEN).toString('hex')
-  const address = response.slice(PKLEN, response.length - 2).toString('ascii')
+  const pubKey = response.subarray(0, PKLEN).toString("hex");
+  const address = response.subarray(PKLEN, response.length - 2).toString("ascii");
 
   return {
     pubKey,
     address,
     return_code: returnCode,
-    error_message: errorCodeToString(returnCode)
+    error_message: errorCodeToString(returnCode),
   };
 }
 
 export class LiskApp {
-  private transport: Transport;
+  private readonly transport: Transport;
 
   constructor(transport: Transport) {
     if (!transport) {
@@ -69,7 +76,7 @@ export class LiskApp {
       if (i > buffer.length) {
         end = buffer.length;
       }
-      chunks.push(buffer.slice(i, end));
+      chunks.push(buffer.subarray(i, end));
     }
     return chunks;
   }
@@ -79,12 +86,12 @@ export class LiskApp {
   }
 
   async getVersion(): Promise<ResponseVersion> {
-    return getVersion(this.transport).catch(err => processErrorResponse(err));
+    return await getVersion(this.transport).catch((err) => processErrorResponse(err));
   }
 
   async getAppInfo(): Promise<ResponseAppInfo> {
-    return this.transport.send(0xb0, 0x01, 0, 0).then(response => {
-      const errorCodeData = response.slice(-2);
+    return await this.transport.send(0xb0, 0x01, 0, 0).then((response) => {
+      const errorCodeData = response.subarray(-2);
       const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
 
       const result: { errorMessage?: string; returnCode?: LedgerError } = {};
@@ -100,11 +107,11 @@ export class LiskApp {
         result.returnCode = LedgerError.DeviceIsBusy;
       } else {
         const appNameLen = response[1];
-        appName = response.slice(2, 2 + appNameLen).toString("ascii");
+        appName = response.subarray(2, 2 + appNameLen).toString("ascii");
         let idx = 2 + appNameLen;
         const appVersionLen = response[idx];
         idx += 1;
-        appVersion = response.slice(idx, idx + appVersionLen).toString("ascii");
+        appVersion = response.subarray(idx, idx + appVersionLen).toString("ascii");
         idx += appVersionLen;
         const appFlagsLen = response[idx];
         idx += 1;
@@ -132,37 +139,31 @@ export class LiskApp {
   }
 
   async deviceInfo(): Promise<ResponseDeviceInfo> {
-    return this.transport.send(0xe0, 0x01, 0, 0, Buffer.from([]), [0x6e00])
-      .then(response => {
-        const errorCodeData = response.slice(-2);
+    return await this.transport
+      .send(0xe0, 0x01, 0, 0, Buffer.from([]), [LedgerError.NoErrors, LedgerError.AppDoesNotSeemToBeOpen])
+      .then((response) => {
+        const errorCodeData = response.subarray(-2);
         const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
 
-        if (returnCode === 0x6e00) {
-          return {
-            return_code: returnCode,
-            error_message: "This command is only available in the Dashboard"
-          };
-        }
-
-        const targetId = response.slice(0, 4).toString("hex");
+        const targetId = response.subarray(0, 4).toString("hex");
 
         let pos = 4;
         const secureElementVersionLen = response[pos];
         pos += 1;
-        const seVersion = response.slice(pos, pos + secureElementVersionLen).toString();
+        const seVersion = response.subarray(pos, pos + secureElementVersionLen).toString();
         pos += secureElementVersionLen;
 
         const flagsLen = response[pos];
         pos += 1;
-        const flag = response.slice(pos, pos + flagsLen).toString("hex");
+        const flag = response.subarray(pos, pos + flagsLen).toString("hex");
         pos += flagsLen;
 
         const mcuVersionLen = response[pos];
         pos += 1;
         // Patch issue in mcu version
-        let tmp = response.slice(pos, pos + mcuVersionLen);
+        let tmp = response.subarray(pos, pos + mcuVersionLen);
         if (tmp[mcuVersionLen - 1] === 0) {
-          tmp = response.slice(pos, pos + mcuVersionLen - 1);
+          tmp = response.subarray(pos, pos + mcuVersionLen - 1);
         }
         const mcuVersion = tmp.toString();
 
@@ -180,79 +181,92 @@ export class LiskApp {
 
   async getAddressAndPubKey(path: string): Promise<ResponseAddress> {
     const serializedPath = serializePath(path);
-    return this.transport
-        .send(CLA, INS.GET_ADDR_PUBKEY, P1_VALUES.ONLY_RETRIEVE, 0, serializedPath, [0x9000])
-        .then(processGetAddrResponse, processErrorResponse);
+    return await this.transport
+      .send(CLA, INS.GET_ADDR_PUBKEY, P1_VALUES.ONLY_RETRIEVE, 0, serializedPath, [LedgerError.NoErrors])
+      .then(processGetAddrResponse, processErrorResponse);
+  }
+
+  async getMultipleAddresses(indexes: number[]): Promise<ResponseMultipleAddresses> {
+    if (indexes.length === 0) throw new Error("Indexes array must not be empty");
+    const addresses: ResponseMultipleAddresses = {
+      return_code: LedgerError.NoErrors,
+      error_message: errorCodeToString(LedgerError.NoErrors),
+      addr: {},
+    };
+    for (const index of indexes) {
+      const addr = await this.getAddressAndPubKey(`m/44'/134'/${index}'`);
+      if (addr.return_code !== LedgerError.NoErrors)
+        return { return_code: addr.return_code, error_message: addr.error_message, addr: [] };
+      addresses.addr[index] = { pubKey: addr.pubKey, address: addr.address };
+    }
+    return addresses;
   }
 
   async showAddressAndPubKey(path: string): Promise<ResponseAddress> {
     const serializedPath = serializePath(path);
-    return this.transport
-        .send(CLA, INS.GET_ADDR_PUBKEY, P1_VALUES.SHOW_ADDRESS_IN_DEVICE, 0, serializedPath, [
-            LedgerError.NoErrors,
-        ])
-        .then(processGetAddrResponse, processErrorResponse);
+    return await this.transport
+      .send(CLA, INS.GET_ADDR_PUBKEY, P1_VALUES.SHOW_ADDRESS_IN_DEVICE, 0, serializedPath, [LedgerError.NoErrors])
+      .then(processGetAddrResponse, processErrorResponse);
   }
 
   async signSendChunk(chunkIdx: number, chunkNum: number, chunk: Buffer, ins: number): Promise<ResponseSign> {
     let payloadType = PAYLOAD_TYPE.ADD;
     if (chunkIdx === 1) {
-        payloadType = PAYLOAD_TYPE.INIT;
+      payloadType = PAYLOAD_TYPE.INIT;
     }
     if (chunkIdx === chunkNum) {
-        payloadType = PAYLOAD_TYPE.LAST;
+      payloadType = PAYLOAD_TYPE.LAST;
     }
 
     // Check supported sign instructions
-    if(ins !== INS.SIGN_TXN) {
-      //Error here
+    if (ins !== INS.SIGN_TXN) {
+      // Error here
     }
 
-    return this.transport
+    return await this.transport
       .send(CLA, ins, payloadType, 0, chunk, [
         LedgerError.NoErrors,
         LedgerError.DataIsInvalid,
         LedgerError.BadKeyHandle,
-        LedgerError.SignVerifyError
+        LedgerError.SignVerifyError,
       ])
       .then((response: Buffer) => {
-        const errorCodeData = response.slice(-2);
+        const errorCodeData = response.subarray(-2);
         const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
         let errorMessage = errorCodeToString(returnCode);
 
-        if (returnCode === LedgerError.BadKeyHandle ||
+        if (
+          returnCode === LedgerError.BadKeyHandle ||
           returnCode === LedgerError.DataIsInvalid ||
-          returnCode === LedgerError.SignVerifyError) {
-          errorMessage = `${errorMessage} : ${response
-            .slice(0, response.length - 2)
-            .toString("ascii")}`;
+          returnCode === LedgerError.SignVerifyError
+        ) {
+          errorMessage = `${errorMessage} : ${response.subarray(0, response.length - 2).toString("ascii")}`;
         }
 
         if (returnCode === LedgerError.NoErrors && response.length > 2) {
-          const signature = response.slice(0, response.length - 2);
+          const signature = response.subarray(0, response.length - 2);
           return {
             signature,
             return_code: returnCode,
-            error_message: errorCodeToString(returnCode),
+            error_message: errorMessage,
           };
         }
 
         return {
           return_code: returnCode,
-          error_message: errorCodeToString(returnCode),
-        } as ResponseSign;
-
+          error_message: errorMessage,
+        };
       }, processErrorResponse);
   }
 
   async sign(path: string, message: Buffer) {
-    return this.signGetChunks(path, message).then(chunks => {
-      return this.signSendChunk(1, chunks.length, chunks[0], INS.SIGN_TXN).then(async result => {
+    return await this.signGetChunks(path, message).then(async (chunks) => {
+      return await this.signSendChunk(1, chunks.length, chunks[0], INS.SIGN_TXN).then(async (result) => {
         for (let i = 1; i < chunks.length; i += 1) {
           // eslint-disable-next-line no-await-in-loop,no-param-reassign
-          result = await this.signSendChunk(1 + i, chunks.length, chunks[i], INS.SIGN_TXN)
+          result = await this.signSendChunk(1 + i, chunks.length, chunks[i], INS.SIGN_TXN);
           if (result.return_code !== ERROR_CODE.NoError) {
-            break
+            break;
           }
         }
 
@@ -260,19 +274,19 @@ export class LiskApp {
           return_code: result.return_code,
           error_message: result.error_message,
           signature: result.signature,
-        }
-      }, processErrorResponse)
-    })
+        };
+      }, processErrorResponse);
+    });
   }
 
   async signMessage(path: string, message: Buffer) {
-    return this.signGetChunks(path, message).then(chunks => {
-      return this.signSendChunk(1, chunks.length, chunks[0], INS.SIGN_MSG).then(async result => {
+    return await this.signGetChunks(path, message).then(async (chunks) => {
+      return await this.signSendChunk(1, chunks.length, chunks[0], INS.SIGN_MSG).then(async (result) => {
         for (let i = 1; i < chunks.length; i += 1) {
           // eslint-disable-next-line no-await-in-loop,no-param-reassign
-          result = await this.signSendChunk(1 + i, chunks.length, chunks[i], INS.SIGN_MSG)
+          result = await this.signSendChunk(1 + i, chunks.length, chunks[i], INS.SIGN_MSG);
           if (result.return_code !== ERROR_CODE.NoError) {
-            break
+            break;
           }
         }
 
@@ -280,29 +294,25 @@ export class LiskApp {
           return_code: result.return_code,
           error_message: result.error_message,
           signature: result.signature,
-        }
-      }, processErrorResponse)
-    })
+        };
+      }, processErrorResponse);
+    });
   }
 }
-
 
 /**
  * Class to specify An account used to query the ledger.
  */
- enum SupportedCoin {
+enum SupportedCoin {
   /**
    * @see https://lisk.io
    */
-  LISK = 134
+  LISK = 134,
 }
 
 export class LedgerAccount {
-  // tslint:disable variable-name
-  private _account: number   = 0;
+  private _account: number = 0;
   private _coinIndex: SupportedCoin = SupportedCoin.LISK; // LISK
-
-  // tslint:enable variable-name
 
   /**
    * Specify the account number
@@ -342,11 +352,10 @@ export class LedgerAccount {
    */
   private assertValidPath(n: number) {
     if (!Number.isInteger(n)) {
-      throw new Error('Param must be an integer');
+      throw new Error("Param must be an integer");
     }
     if (n < 0) {
-      throw new Error('Param must be greater than zero');
+      throw new Error("Param must be greater than zero");
     }
   }
 }
-

@@ -34,6 +34,7 @@ extern "C" {
 #define MAX_COMMAND_NAME_LENGTH 32
 #define NETWORK_ID_LENGTH 32
 #define TOKEN_ID_LENGTH 8
+#define MSG_FEE_TOKEN_ID_LENGTH 8
 #define CHAIN_ID_LENGTH 4
 #define BLS_PUBLIC_KEY_LENGTH 48
 #define BLS_POP_LENGTH 96
@@ -43,26 +44,41 @@ extern "C" {
 #define MAX_NUMBER_OF_KEYS 64
 #define USER_ACCOUNT_INITIALIZATION_FEE 5000000
 #define ESCROW_ACCOUNT_INITIALIZATION_FEE 5000000
-#define MAX_NUMBER_SENT_VOTES 10
-#define BASE_VOTE_AMOUNT 1000000000
-#define BASE_VOTE_AMOUNT_DECIMALS 100000000
+#define MAX_NUMBER_SENT_STAKES 10
+#define BASE_STAKE_AMOUNT 1000000000
+#define BASE_STAKE_AMOUNT_DECIMALS 100000000
+#define SENDINGCHAIN_ID_LENGTH 4
+#define OWNCHAIN_ID_LENGTH 4
+#define INTEROP_CHAINID_LENGTH 4
 
 #define TX_MODULE_ID_TOKEN 0
 #define TX_MODULE_ID_AUTH 1
-#define TX_MODULE_ID_DPOS 2
+#define TX_MODULE_ID_POS 2
 #define TX_MODULE_ID_LEGACY 3
+#define TX_MODULE_ID_INTEROP 4
 
-#define DPOS_VOTE_SIZE_OFFSET 2
-#define DPOS_VOTE_ADDRESS_OFFSET 4
+#define POS_STAKE_SIZE_OFFSET 2
+#define POS_STAKE_ADDRESS_OFFSET 4
 
 #define TX_COMMAND_ID_TRANSFER 0
 #define TX_COMMAND_ID_CROSSCHAIN_TRANSFER 1
 #define TX_COMMAND_ID_REGISTER_MULTISIG_GROUP 0
-#define TX_COMMAND_ID_REGISTER_DELEGATE 0
-#define TX_COMMAND_ID_VOTE_DELEGATE 1
-#define TX_COMMAND_ID_UNLOCK_TOKEN 2
-#define TX_COMMAND_ID_REPORT_DELEGATE_MISBEHAVIOUR 3
+#define TX_COMMAND_ID_REGISTER_VALIDATOR 0
+#define TX_COMMAND_ID_STAKE 1
+#define TX_COMMAND_ID_UNLOCK 2
+#define TX_COMMAND_ID_REPORT_MISBEHAVIOUR 3
+#define TX_COMMAND_ID_CLAIM_REWARDS 4
+#define TX_COMMAND_ID_CHANGE_COMMISSION 5
 #define TX_COMMAND_ID_RECLAIM 0
+#define TX_COMMAND_ID_REGISTER_KEYS 1
+#define TX_COMMAND_ID_MAINCHAIN_CC_UPDATE 0
+#define TX_COMMAND_ID_SIDECHAIN_CC_UPDATE 1
+#define TX_COMMAND_ID_MAINCHAIN_REG 2
+#define TX_COMMAND_ID_MSG_RECOVERY 3
+#define TX_COMMAND_ID_MSG_RECOVERY_INIT 4
+#define TX_COMMAND_ID_SIDECHAIN_REG 5
+#define TX_COMMAND_ID_STATE_RECOVERY 6
+#define TX_COMMAND_ID_STATE_RECOVERY_INIT 7
 
 #define RECLAIM_AMOUNT_TYPE 0
 
@@ -70,7 +86,6 @@ typedef enum token_transfer_fields {
   TOKEN_TRANSFER_TOKEN_ID_TYPE = 0,
   TOKEN_TRANSFER_AMOUNT_TYPE,
   TOKEN_TRANSFER_RX_ADDRESS_TYPE,
-  TOKEN_TRANSFER_ACCNT_INIT_FEE_TYPE,
   TOKEN_TRANSFER_DATA_TYPE,
 } token_transfer_fields;
 
@@ -79,8 +94,8 @@ typedef enum token_crosschain_fields {
   TOKEN_CROSSCHAIN_AMOUNT_TYPE,
   TOKEN_CROSSCHAIN_RX_ADDRESS_TYPE,
   TOKEN_CROSSCHAIN_RX_CHAIN_ID_TYPE,
-  TOKEN_CROSSCHAIN_ESCROW_FEE_TYPE,
   TOKEN_CROSSCHAIN_MSG_FEE_TYPE,
+  TOKEN_CROSSCHAIN_MSG_FEE_TOKEN_ID_TYPE,
   TOKEN_CROSSCHAIN_DATA_TYPE,
 } token_crosschain_fields;
 
@@ -91,17 +106,33 @@ typedef enum auth_multi_fields {
   AUTH_MULTI_SIG_TYPE,     
 } auth_multi_fields;
 
-typedef enum dpos_vote_fields {
-  DPOS_VOTE_ADDRESS_TYPE = 0,
-  DPOS_VOTE_AMOUNT_TYPE, 
-} dpos_vote_fields;
+typedef enum pos_stake_fields {
+  POS_STAKE_ADDRESS_TYPE = 0,
+  POS_STAKE_AMOUNT_TYPE, 
+} pos_stake_fields;
 
-typedef enum dpos_reg_delegate_fields {
-  DPOS_REG_DELEGATE_NAME_TYPE = 0,
-  DPOS_REG_DELEGATE_GENKEY_TYPE,
-  DPOS_REG_DELEGATE_BLSKEY_TYPE,
-  DPOS_REG_DELEGATE_POP_TYPE, 
-} dpos_reg_delegate_fields;
+typedef enum pos_reg_validator_fields {
+  POS_REG_VALIDATOR_NAME_TYPE = 0,
+  POS_REG_VALIDATOR_GENKEY_TYPE,
+  POS_REG_VALIDATOR_BLSKEY_TYPE,
+  POS_REG_VALIDATOR_POP_TYPE, 
+} pos_reg_validator_fields;
+
+typedef enum interop_mainchain_reg_fields {
+  INTEROP_MAIN_REG_OWNCHAIN_ID_TYPE = 0,
+  INTEROP_MAIN_REG_OWNNAME_TYPE,
+} interop_mainchain_reg_fields;
+
+typedef enum interop_sidechain_reg_fields {
+  INTEROP_SIDE_REG_NAME_TYPE = 0,
+  INTEROP_SIDE_REG_CHAIN_ID_TYPE 
+} interop_sidechain_reg_fields;
+
+typedef enum legacy_registerKeys_fields {
+  LEGACY_REGISTER_KEYS_GENKEY_TYPE = 0,
+  LEGACY_REGISTER_KEYS_BLSKEY_TYPE,
+  LEGACY_REGISTER_KEYS_POP_TYPE, 
+} legacy_registerKeys_fields;
 
 typedef struct {
     char name[32];
@@ -114,7 +145,6 @@ typedef struct tx_command_token_transfer {
   uint8_t recipientAddress[ADDRESS_HASH_LENGTH];
   const uint8_t *data;
   uint32_t dataLength;
-  uint64_t accountInitializationFee;
 } tx_command_token_transfer_t;
 
 typedef struct tx_command_token_crosschain_transfer {
@@ -125,7 +155,7 @@ typedef struct tx_command_token_crosschain_transfer {
   const uint8_t *data;
   uint32_t dataLength;
   uint64_t messageFee;
-  uint64_t escrowInitializationFee;
+  const uint8_t *messageFeeTokenID;
 } tx_command_token_crosschain_transfer_t;
 
 typedef struct tx_command_auth_multisig_group {
@@ -138,36 +168,83 @@ typedef struct tx_command_auth_multisig_group {
 
 } tx_command_auth_multisig_group_t;
 
-typedef struct tx_command_dpos_reg_delegate {
+typedef struct tx_command_pos_reg_validator {
   const uint8_t *name;
   uint8_t nameLength;
   const uint8_t *blskey;
   const uint8_t *proofOfPossession;
   const uint8_t *generatorKey;
-  uint64_t delegateRegistrationFee;
-} tx_command_dpos_reg_delegate_t;
+} tx_command_pos_reg_validator_t;
 
-typedef struct tx_command_dpos_vote_delegate {
+typedef struct tx_command_pos_stake {
   const uint8_t *start;
-  uint8_t n_vote;
-  uint8_t voteSize[2*MAX_NUMBER_SENT_VOTES];
-  int64_t amounts[2*MAX_NUMBER_SENT_VOTES];
-} tx_command_dpos_vote_delegate_t;
+  uint8_t n_stake;
+  uint8_t stakeSize[2*MAX_NUMBER_SENT_STAKES];
+  int64_t amounts[2*MAX_NUMBER_SENT_STAKES];
+} tx_command_pos_stake_t;
 
-typedef struct tx_command_dpos_unlock_token {
+typedef struct tx_command_pos_unlock {
   uint32_t n_unlock;
-} tx_command_dpos_unlock_token_t;
+} tx_command_pos_unlock_t;
 
-typedef struct tx_command_dpos_delegate_misbehavior {
+typedef struct tx_command_pos_misbehavior {
   const uint8_t *header1;
   uint32_t header1Length;
   const uint8_t *header2;
   uint32_t header2Length;
-} tx_command_dpos_delegate_misbehavior_t;
+} tx_command_pos_misbehavior_t;
+
+typedef struct tx_command_pos_claim_rewards {
+    uint8_t id;
+} tx_command_pos_claim_rewards_t;
+
+typedef struct tx_command_pos_change_commissions {
+    uint32_t newCommission;
+} tx_command_pos_change_commissions_t;
 
 typedef struct tx_command_legacy_token_reclaim {
   uint64_t amount;
 } tx_command_legacy_token_reclaim_t;
+
+typedef struct tx_command_legacy_register_keys {
+  const uint8_t *blskey;
+  const uint8_t *proofOfPossession;
+  const uint8_t *generatorKey;
+} tx_command_legacy_register_keys_t;
+
+typedef struct tx_command_interop_chain_cc_update {
+  const uint8_t *sendingChainID;
+} tx_command_interop_chain_cc_update_t;
+
+typedef struct tx_command_interop_mainchain_register {
+  const uint8_t *ownChainId;
+  const uint8_t *ownName;
+  uint8_t ownNameLen;
+} tx_command_interop_mainchain_register_t;
+
+typedef struct tx_command_interop_recover_msg {
+  const uint8_t *chainID;
+} tx_command_interop_recover_msg_t;
+
+typedef struct tx_command_interop_recover_msg_init {
+  const uint8_t *chainID;
+} tx_command_interop_recover_msg_init_t;
+
+typedef struct tx_command_interop_sidechain_register {
+  const uint8_t *chainID;
+  const uint8_t *name;
+  uint8_t nameLen;
+} tx_command_interop_sidechain_register_t;
+
+typedef struct tx_command_interop_recover_state {
+  const uint8_t *chainID;
+  const uint8_t *module;
+  uint8_t moduleLen;
+} tx_command_interop_recover_state_t;
+
+typedef struct tx_command_interop_recover_state_init {
+  const uint8_t *chainID;
+} tx_command_interop_recover_state_init_t;
 
 typedef union tx_command {
   tx_command_token_transfer_t _token_transfer;
@@ -175,12 +252,23 @@ typedef union tx_command {
 
   tx_command_auth_multisig_group_t _reg_multisign_group;
 
-  tx_command_dpos_reg_delegate_t _dpos_reg_delegate;
-  tx_command_dpos_vote_delegate_t _dpos_vote_delegate;
-  tx_command_dpos_unlock_token_t _dpos_unlock_token;
-  tx_command_dpos_delegate_misbehavior_t _dpos_delegate_misbehavior;
+  tx_command_pos_reg_validator_t _pos_reg_validator;
+  tx_command_pos_stake_t _pos_stake;
+  tx_command_pos_unlock_t _pos_unlock;
+  tx_command_pos_misbehavior_t _pos_misbehavior;
+  tx_command_pos_claim_rewards_t _pos_claim_rewards;
+  tx_command_pos_change_commissions_t _pos_change_commissions;
 
   tx_command_legacy_token_reclaim_t _legacy_token_reclaim;
+  tx_command_legacy_register_keys_t _legacy_register_keys;
+
+  tx_command_interop_chain_cc_update_t _interop_chain_cc_update;
+  tx_command_interop_mainchain_register_t  _interop_mainchain_register;
+  tx_command_interop_recover_msg_t _interpo_recover_msg;
+  tx_command_interop_recover_msg_init_t _interpo_recover_msg_init;
+  tx_command_interop_sidechain_register_t _interop_sidechain_register;
+  tx_command_interop_recover_state_t _interop_recover_state;
+  tx_command_interop_recover_state_init_t _interop_recover_state_init;
 } tx_command_t;
 
 typedef struct{

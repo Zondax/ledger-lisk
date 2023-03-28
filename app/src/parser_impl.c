@@ -19,7 +19,8 @@
 #include "txn_token_module.h"
 #include "txn_auth_module.h"
 #include "txn_legacy_module.h"
-#include "txn_dpos_module.h"
+#include "txn_pos_module.h"
+#include "txn_interop_module.h"
 #include "app_mode.h"
 
 static uint8_t tx_num_items;
@@ -31,20 +32,34 @@ static uint8_t itemIndex = 0;
 
 
 static const string_subst_t module_substitutions[] = {
-        {"token",  0},
-        {"auth",   1},
-        {"dpos",   2},
-        {"legacy", 3},
+        {"token",   0},
+        {"auth",    1},
+        {"pos",     2},
+        {"legacy",  3},
+        {"interoperability", 4}
 };
 static const string_subst_t command_substitutions[] = {
-        {"transfer",                    0},
-        {"transferCrossChain",          1},
-        {"registerMultisignature",      0},
-        {"registerDelegate",            0},
-        {"vote",                        1},
-        {"unlock",                      2},
-        {"reportMisbehavior",           3},
-        {"reclaimLSK",                  0},
+        {"transfer",                        0},
+        {"transferCrossChain",              1},
+        {"registerMultisignature",          0},
+        {"registerValidator",               0},
+        {"stake",                           1},
+        {"unlock",                          2},
+        {"reportMisbehavior",               3},
+        {"claimRewards",                    4},
+        {"changeCommission",                5},
+        {"reclaimLSK",                      0},
+        {"registerKeys",                    1},
+
+        {"submitMainchainCrossChainUpdate", 0},
+        {"submitSidechainCrossChainUpdate", 1},
+        {"registerMainchain",               2},
+        {"recoverMessage",                  3},
+        {"initializeMessageRecovery",       4},
+        {"registerSidechain",               5},
+        {"recoverState",                    6},
+        {"initializeStateRecovery",         7},
+
 };
 
 static parser_error_t find_id(parser_tx_t *tx_obj,uint8_t* module, uint8_t module_length, uint8_t* command, uint8_t command_length) {
@@ -172,19 +187,17 @@ uint8_t _getNumCommonItems() {
 uint8_t _getNumItems(const parser_context_t *ctx) {
     uint8_t items = _getNumCommonItems();
     uint8_t dataItem = 0;
-    uint8_t msgfee = 0;
 
     switch (ctx->tx_obj->module_id) {
         case TX_MODULE_ID_TOKEN: {
             switch (ctx->tx_obj->command_id ) {
                 case TX_COMMAND_ID_TRANSFER:
                     dataItem = (ctx->tx_obj->tx_command._token_transfer.dataLength > 0 && app_mode_expert()) ? 1 : 0;
-                    items += 4 + dataItem;
+                    items += 3 + dataItem;
                     break;
                 case TX_COMMAND_ID_CROSSCHAIN_TRANSFER:
                     dataItem = (ctx->tx_obj->tx_command._token_crosschain_transfer.dataLength > 0 && app_mode_expert()) ? 1 : 0;
-                    msgfee = ((app_mode_expert()) ? 1 : 0);
-                    items += 5 + dataItem + msgfee;
+                    items += 4 + dataItem + ((app_mode_expert()) ? 2 : 0);
                     break;
                 default:
                     items = 0;
@@ -196,17 +209,21 @@ uint8_t _getNumItems(const parser_context_t *ctx) {
                 items += _getTxNumItems();
             break;
 
-        case TX_MODULE_ID_DPOS: {
+        case TX_MODULE_ID_POS: {
             switch (ctx->tx_obj->command_id ) {
-                case TX_COMMAND_ID_REGISTER_DELEGATE:
+                case TX_COMMAND_ID_REGISTER_VALIDATOR:
                     items += 1 + (app_mode_expert() ? 3 : 0);
                     break;
-                case TX_COMMAND_ID_VOTE_DELEGATE:
+                case TX_COMMAND_ID_STAKE:
                     items += _getTxNumItems();
                     break;
-                case TX_COMMAND_ID_UNLOCK_TOKEN:
-                case TX_COMMAND_ID_REPORT_DELEGATE_MISBEHAVIOUR:
+                case TX_COMMAND_ID_UNLOCK:
+                case TX_COMMAND_ID_REPORT_MISBEHAVIOUR:
+                case TX_COMMAND_ID_CLAIM_REWARDS:
                     items += 0;
+                    break;
+                case TX_COMMAND_ID_CHANGE_COMMISSION:
+                    items += 1;
                     break;
                 default:
                     items = 0;
@@ -214,9 +231,36 @@ uint8_t _getNumItems(const parser_context_t *ctx) {
             break;
         }
         case TX_MODULE_ID_LEGACY:
-            items += 1;
+            switch (ctx->tx_obj->command_id ) {
+                case TX_COMMAND_ID_RECLAIM:
+                    items += 1;
+                    break;
+                case TX_COMMAND_ID_REGISTER_KEYS:
+                    items += (app_mode_expert() ? 3 : 0);
+            }
             break;
 
+        case TX_MODULE_ID_INTEROP: {
+            switch (ctx->tx_obj->command_id ) {
+                case TX_COMMAND_ID_MAINCHAIN_CC_UPDATE:
+                case TX_COMMAND_ID_SIDECHAIN_CC_UPDATE:
+                case TX_COMMAND_ID_MSG_RECOVERY:
+                case TX_COMMAND_ID_MSG_RECOVERY_INIT:
+                case TX_COMMAND_ID_STATE_RECOVERY_INIT:
+                    items += 1;
+                    break;
+                case TX_COMMAND_ID_MAINCHAIN_REG:
+                case TX_COMMAND_ID_STATE_RECOVERY:
+                    items += 2;
+                    break;
+                case TX_COMMAND_ID_SIDECHAIN_REG:
+                    items += 1 + (app_mode_expert() ? 1 : 0);
+                    break;
+                default:
+                    items = 0;
+            }
+            break;
+        }
         default:
             items = 0;
             break;
@@ -237,12 +281,16 @@ parser_error_t _read(parser_context_t *ctx, parser_tx_t *tx_obj) {
             CHECK_ERROR(parse_auth_module(ctx, tx_obj))
             break;
 
-        case TX_MODULE_ID_DPOS:
-            CHECK_ERROR(parse_dpos_module(ctx, tx_obj))
+        case TX_MODULE_ID_POS:
+            CHECK_ERROR(parse_pos_module(ctx, tx_obj))
             break;
 
         case TX_MODULE_ID_LEGACY:
              CHECK_ERROR(parse_legacy_module(ctx, tx_obj))
+            break;
+
+        case TX_MODULE_ID_INTEROP:
+            CHECK_ERROR(parse_interop_module(ctx, tx_obj))
             break;
 
         default:
@@ -284,7 +332,8 @@ const char *parser_getErrorDescription(parser_error_t err) {
             return "display index out of range";
         case parser_display_page_out_of_range:
             return "display page out of range";
-
+        case parser_unexpected_tag_init:
+            return "Unexpected tag init";
         default:
             return "Unrecognized error code";
     }

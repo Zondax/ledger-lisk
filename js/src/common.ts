@@ -13,8 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ******************************************************************************* */
-import Transport from '@ledgerhq/hw-transport';
-import {CLA, INS} from "./config";
+import type Transport from "@ledgerhq/hw-transport";
+import { CLA, INS } from "./config";
 
 export const CHUNK_SIZE = 250;
 
@@ -33,10 +33,9 @@ export const P2_VALUES = {
   DEFAULT: 0x00,
 };
 
-
 export const ERROR_CODE = {
   NoError: 0x9000,
-}
+};
 
 export enum LedgerError {
   U2FUnknown = 1,
@@ -58,34 +57,34 @@ export enum LedgerError {
   BadKeyHandle = 0x6a80,
   InvalidP1P2 = 0x6b00,
   InstructionNotSupported = 0x6d00,
-  AppDoesNotSeemToBeOpen = 0x6e00,
+  AppDoesNotSeemToBeOpen = 0x6e01,
   UnknownError = 0x6f00,
   SignVerifyError = 0x6f01,
 }
 
 export const ERROR_DESCRIPTION = {
-  [LedgerError.U2FUnknown]: 'U2F: Unknown',
-  [LedgerError.U2FBadRequest]: 'U2F: Bad request',
-  [LedgerError.U2FConfigurationUnsupported]: 'U2F: Configuration unsupported',
-  [LedgerError.U2FDeviceIneligible]: 'U2F: Device Ineligible',
-  [LedgerError.U2FTimeout]: 'U2F: Timeout',
-  [LedgerError.Timeout]: 'Timeout',
-  [LedgerError.NoErrors]: 'No errors',
-  [LedgerError.DeviceIsBusy]: 'Device is busy',
-  [LedgerError.ErrorDerivingKeys]: 'Error deriving keys',
-  [LedgerError.ExecutionError]: 'Execution Error',
-  [LedgerError.WrongLength]: 'Wrong Length',
-  [LedgerError.EmptyBuffer]: 'Empty Buffer',
-  [LedgerError.OutputBufferTooSmall]: 'Output buffer too small',
-  [LedgerError.DataIsInvalid]: 'Data is invalid',
-  [LedgerError.ConditionsNotSatisfied]: 'Conditions not satisfied',
-  [LedgerError.TransactionRejected]: 'Transaction rejected',
-  [LedgerError.BadKeyHandle]: 'Bad key handle',
-  [LedgerError.InvalidP1P2]: 'Invalid P1/P2',
-  [LedgerError.InstructionNotSupported]: 'Instruction not supported',
-  [LedgerError.AppDoesNotSeemToBeOpen]: 'App does not seem to be open',
-  [LedgerError.UnknownError]: 'Unknown error',
-  [LedgerError.SignVerifyError]: 'Sign/verify error',
+  [LedgerError.U2FUnknown]: "U2F: Unknown",
+  [LedgerError.U2FBadRequest]: "U2F: Bad request",
+  [LedgerError.U2FConfigurationUnsupported]: "U2F: Configuration unsupported",
+  [LedgerError.U2FDeviceIneligible]: "U2F: Device Ineligible",
+  [LedgerError.U2FTimeout]: "U2F: Timeout",
+  [LedgerError.Timeout]: "Timeout",
+  [LedgerError.NoErrors]: "No errors",
+  [LedgerError.DeviceIsBusy]: "Device is busy",
+  [LedgerError.ErrorDerivingKeys]: "Error deriving keys",
+  [LedgerError.ExecutionError]: "Execution Error",
+  [LedgerError.WrongLength]: "Wrong Length",
+  [LedgerError.EmptyBuffer]: "Empty Buffer",
+  [LedgerError.OutputBufferTooSmall]: "Output buffer too small",
+  [LedgerError.DataIsInvalid]: "Data is invalid",
+  [LedgerError.ConditionsNotSatisfied]: "Conditions not satisfied",
+  [LedgerError.TransactionRejected]: "Transaction rejected",
+  [LedgerError.BadKeyHandle]: "Bad key handle",
+  [LedgerError.InvalidP1P2]: "Invalid P1/P2",
+  [LedgerError.InstructionNotSupported]: "Instruction not supported",
+  [LedgerError.AppDoesNotSeemToBeOpen]: "App does not seem to be open",
+  [LedgerError.UnknownError]: "Unknown error",
+  [LedgerError.SignVerifyError]: "Sign/verify error",
 };
 
 export function errorCodeToString(statusCode: LedgerError) {
@@ -94,25 +93,25 @@ export function errorCodeToString(statusCode: LedgerError) {
 }
 
 function isDict(v: any) {
-  return typeof v === 'object' && v !== null && !(v instanceof Array) && !(v instanceof Date);
+  return typeof v === "object" && v !== null && !(v instanceof Array) && !(v instanceof Date);
 }
 
 export function processErrorResponse(response?: any) {
   if (response) {
     if (isDict(response)) {
-      if (Object.prototype.hasOwnProperty.call(response, 'statusCode')) {
+      if (Object.prototype.hasOwnProperty.call(response, "statusCode")) {
         return {
           returnCode: response.statusCode,
           errorMessage: errorCodeToString(response.statusCode),
-// legacy
+          // legacy
           return_code: response.statusCode,
           error_message: errorCodeToString(response.statusCode),
         };
       }
 
       if (
-        Object.prototype.hasOwnProperty.call(response, 'returnCode') &&
-        Object.prototype.hasOwnProperty.call(response, 'errorMessage')
+        Object.prototype.hasOwnProperty.call(response, "returnCode") &&
+        Object.prototype.hasOwnProperty.call(response, "errorMessage")
       ) {
         return response;
       }
@@ -120,7 +119,7 @@ export function processErrorResponse(response?: any) {
     return {
       returnCode: 0xffff,
       errorMessage: response.toString(),
-// legacy
+      // legacy
       return_code: 0xffff,
       error_message: response.toString(),
     };
@@ -133,17 +132,9 @@ export function processErrorResponse(response?: any) {
 }
 
 export async function getVersion(transport: Transport) {
-  return transport.send(CLA, INS.GET_VERSION, 0, 0).then(response => {
-    const errorCodeData = response.slice(-2);
+  return await transport.send(CLA, INS.GET_VERSION, 0, 0).then((response) => {
+    const errorCodeData = response.subarray(-2);
     const returnCode = (errorCodeData[0] * 256 + errorCodeData[1]) as LedgerError;
-
-    let targetId = 0;
-    if (response.length >= 9) {
-      /* eslint-disable no-bitwise */
-      targetId =
-        (response[5] << 24) + (response[6] << 16) + (response[7] << 8) + (response[8] << 0);
-      /* eslint-enable no-bitwise */
-    }
 
     return {
       deviceLocked: response[4] === 1,
@@ -159,48 +150,37 @@ export async function getVersion(transport: Transport) {
 }
 
 const HARDENED = 0x80000000;
-const DEFAULT_DER_PATH_LEN = 6;
-const IDENTITY_DER_PATH_LEN = 4; // m/888'/0'/<account>
+const DER_PATH_LEN = 4;
 
 export function serializePath(path: string) {
-  if (!path.startsWith('m')) {
-    throw new Error(`Path should start with "m" (e.g "m/44'/5757'/5'/0/3")`);
+  if (!path.startsWith("m")) {
+    throw new Error(`Path should start with "m" (e.g "m/44'/134'/5'")`);
   }
 
-  const pathArray = path.split('/');
+  const pathArray = path.split("/");
 
   let allocSize = 0;
 
-  if (pathArray.length === DEFAULT_DER_PATH_LEN || pathArray.length === IDENTITY_DER_PATH_LEN  ) {
-      allocSize = (pathArray.length - 1) * 4 + 1;
-  } else {
-      throw new Error(`Invalid path. (e.g "m/44'/134'/0/0/0"`);
-  }
+  if (pathArray.length !== DER_PATH_LEN) throw new Error(`Invalid path length. (e.g "m/44'/134'/0'")`);
+  allocSize = (pathArray.length - 1) * 4 + 1;
 
   const buf = Buffer.alloc(allocSize);
-  buf.writeUInt8(pathArray.length - 1, 0)
+  buf.writeUInt8(pathArray.length - 1, 0);
 
   for (let i = 1; i < pathArray.length; i += 1) {
-    let value = 0;
-    let child = pathArray[i];
-    if (child.endsWith("'")) {
-      value += HARDENED;
-      child = child.slice(0, -1);
-    }
+    if (!pathArray[i].endsWith("'")) throw new Error(`All path components need to be hardened. (e.g "m/44'/134'/0'")`);
+    const child = pathArray[i].slice(0, -1);
 
     const childNumber = Number(child);
 
     if (Number.isNaN(childNumber)) {
-      throw new Error(`Invalid path : ${child} is not a number. (e.g "m/44'/461'/5'/0/3")`);
+      throw new Error(`Invalid path : ${child} is not a number. (e.g "m/44'/134'/5'")`);
     }
 
-    if (childNumber >= HARDENED) {
-      throw new Error('Incorrect child value (bigger or equal to 0x80000000)');
-    }
+    if (childNumber >= HARDENED) throw new Error("Incorrect child value (bigger or equal to 0x80000000)");
 
-    value += childNumber;
-
-    buf.writeUInt32LE(value, 4 * (i-1) + 1);
+    const value = HARDENED + childNumber;
+    buf.writeUInt32LE(value, 4 * (i - 1) + 1);
   }
 
   return buf;

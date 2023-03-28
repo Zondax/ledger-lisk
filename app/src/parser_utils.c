@@ -128,11 +128,11 @@ parser_error_t _toStringBalance(uint64_t *amount, uint8_t decimalPlaces, char po
     return parser_ok;
 }
 
-parser_error_t _toStringVoteAmount(uint64_t *amount, char prefix[],
+parser_error_t _toStringStakeAmount(uint64_t *amount, char prefix[],
                                 char *outValue, uint16_t outValueLen, uint8_t pageIdx, uint8_t *pageCount)
 {
     char bufferUI[200] = {0};
-    if (uint64_to_str(bufferUI, sizeof(bufferUI), *amount/(BASE_VOTE_AMOUNT_DECIMALS)) != NULL) {
+    if (uint64_to_str(bufferUI, sizeof(bufferUI), *amount/(BASE_STAKE_AMOUNT_DECIMALS)) != NULL) {
         return parser_unexpected_value;
     }
 
