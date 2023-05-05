@@ -149,7 +149,7 @@ parser_error_t print_module_token_transfer(const parser_context_t *ctx,
 
         case TOKEN_TRANSFER_AMOUNT_TYPE: {
             snprintf(outKey, outKeyLen, "Amount");
-            return _toStringBalance(&ctx->tx_obj->tx_command._token_transfer.amount, COIN_AMOUNT_DECIMAL_PLACES, "", COIN_TICKER,
+            return _toStringBalance(&ctx->tx_obj->tx_command._token_transfer.amount, COIN_AMOUNT_DECIMAL_PLACES, (char *)"", (char *)COIN_TICKER,
                         outVal, outValLen, pageIdx, pageCount);
 
         }
@@ -196,7 +196,7 @@ parser_error_t print_module_token_cross(const parser_context_t *ctx,
 
         case TOKEN_CROSSCHAIN_AMOUNT_TYPE: {
             snprintf(outKey, outKeyLen, "Amount");
-            return _toStringBalance(&ctx->tx_obj->tx_command._token_transfer.amount, COIN_AMOUNT_DECIMAL_PLACES, "", COIN_TICKER,
+            return _toStringBalance(&ctx->tx_obj->tx_command._token_transfer.amount, COIN_AMOUNT_DECIMAL_PLACES, (char *)"", (char *)COIN_TICKER,
                         outVal, outValLen, pageIdx, pageCount);
         }
 

@@ -22,8 +22,7 @@
 
 static parser_error_t print_module(uint32_t module_id, char *outKey,
                                    uint16_t outKeyLen, char *outVal,
-                                   uint16_t outValLen, uint8_t pageIdx,
-                                   uint8_t *pageCount) {
+                                   uint16_t outValLen, uint8_t *pageCount) {
   *pageCount = 1;
   snprintf(outKey, outKeyLen, "Module");
   switch (module_id) {
@@ -57,7 +56,7 @@ static parser_error_t print_module(uint32_t module_id, char *outKey,
 static parser_error_t print_command_id(uint32_t module_id, uint32_t command_id,
                                        char *outKey, uint16_t outKeyLen,
                                        char *outVal, uint16_t outValLen,
-                                       uint8_t pageIdx, uint8_t *pageCount) {
+                                       uint8_t *pageCount) {
   *pageCount = 1;
   snprintf(outKey, outKeyLen, "Command");
   switch (module_id) {
@@ -165,12 +164,11 @@ parser_error_t print_common_items(const parser_context_t *ctx,
     switch (displayIdx) {
         case 0:
             return print_module(ctx->tx_obj->module_id, outKey, outKeyLen, outVal,
-                          outValLen, pageIdx, pageCount);
+                          outValLen, pageCount);
 
         case 1:
             return print_command_id(ctx->tx_obj->module_id, ctx->tx_obj->command_id,
-                              outKey, outKeyLen, outVal, outValLen, pageIdx,
-                              pageCount);
+                              outKey, outKeyLen, outVal, outValLen, pageCount);
 
         case 2:
             snprintf(outKey, outKeyLen, "Fee");

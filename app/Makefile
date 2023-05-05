@@ -96,7 +96,7 @@ include $(BOLOS_SDK)/Makefile.rules
 dep/%.d: %.c Makefile
 
 listvariants:
-	@echo VARIANTS COIN lisk
+	@echo VARIANTS COIN LSK
 
 .PHONY: version
 version:

@@ -158,7 +158,7 @@ __Z_INLINE void handleSignMessage(volatile uint32_t *flags, volatile uint32_t *t
     *flags |= IO_ASYNCH_REPLY;
 }
 
-__Z_INLINE void handle_getversion(volatile uint32_t *flags, volatile uint32_t *tx)
+__Z_INLINE void handle_getversion(__Z_UNUSED volatile uint32_t *flags, volatile uint32_t *tx)
 {
     G_io_apdu_buffer[0] = 0;
 

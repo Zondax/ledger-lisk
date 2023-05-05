@@ -36,11 +36,11 @@ parser_error_t _readUnsignedVarint(parser_context_t *ctx, uint64_t *output);
 parser_error_t _readSignedVarint(parser_context_t *ctx, int64_t* result);
 
 parser_error_t _toStringBalance(uint64_t *amount, uint8_t decimalPlaces,
-                                char postfix[], char prefix[], char *outValue,
+                                const char postfix[], const char prefix[], char *outValue,
                                 uint16_t outValueLen, uint8_t pageIdx,
                                 uint8_t *pageCount);
 
-parser_error_t _toStringStakeAmount(uint64_t *amount, char prefix[],
+parser_error_t _toStringStakeAmount(uint64_t *amount, const char prefix[],
                                 char *outValue, uint16_t outValueLen, uint8_t pageIdx, 
                                 uint8_t *pageCount);
 

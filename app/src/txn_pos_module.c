@@ -105,7 +105,7 @@ static parser_error_t parse_stake(parser_context_t *ctx, tx_command_pos_stake_t 
     return parser_ok;
 }
 
-static parser_error_t parse_unlock(parser_context_t *ctx, tx_command_pos_unlock_t *transfer) {
+static parser_error_t parse_unlock(parser_context_t *ctx, __Z_UNUSED tx_command_pos_unlock_t *transfer) {
 
     uint64_t tmp64 = 0;
 
@@ -115,7 +115,7 @@ static parser_error_t parse_unlock(parser_context_t *ctx, tx_command_pos_unlock_
     return parser_ok;
 }
 
-static parser_error_t parse_misbehavior(parser_context_t *ctx, tx_command_pos_misbehavior_t *transfer) {
+static parser_error_t parse_misbehavior(parser_context_t *ctx, __Z_UNUSED tx_command_pos_misbehavior_t *transfer) {
 
     while(ctx->offset < ctx->bufferLen) {
          _verifyBytes(ctx,1);
@@ -123,7 +123,7 @@ static parser_error_t parse_misbehavior(parser_context_t *ctx, tx_command_pos_mi
     return parser_ok;
 }
 
-static parser_error_t parse_claim_rewards(parser_context_t *ctx, tx_command_pos_claim_rewards_t *transfer) {
+static parser_error_t parse_claim_rewards(parser_context_t *ctx, __Z_UNUSED tx_command_pos_claim_rewards_t *transfer) {
 
     while(ctx->offset < ctx->bufferLen) {
          _verifyBytes(ctx,1);
@@ -265,7 +265,7 @@ parser_error_t print_module_pos_change_commission(const parser_context_t *ctx,
                                   uint8_t displayIdx,
                                   char *outKey, uint16_t outKeyLen,
                                   char *outVal, uint16_t outValLen,
-                                  uint8_t pageIdx, uint8_t *pageCount) {
+                                  __Z_UNUSED uint8_t pageIdx, uint8_t *pageCount) {
     *pageCount = 1;
 
     if(displayIdx == 0) {
