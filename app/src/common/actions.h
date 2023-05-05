@@ -23,6 +23,7 @@
 #include "coin.h"
 #include "zxerror.h"
 #include "crypto_helper.h"
+#include "lisk_base32.h"
 
 extern uint16_t action_addrResponseLen;
 
@@ -63,11 +64,11 @@ __Z_INLINE void app_sign_message() {
     const uint16_t messageLength = tx_get_buffer_length();
 
     uint8_t msgHash[CX_SHA256_SIZE] = {0};
-    zxerr_t err_hash = (crypto_hash(message, messageLength, (uint8_t*) &msgHash, CX_SHA256_SIZE) == parser_ok) ? zxerr_ok : zxerr_encoding_failed;
+    
+    zxerr_t err_hash = crypto_msg_hash(message, messageLength, (uint8_t*) &msgHash, CX_SHA256_SIZE);
+    zxerr_t err_sign = crypto_sign(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE - 3, (const uint8_t*)&msgHash, CX_SHA256_SIZE);
 
-    zxerr_t err_sign= crypto_sign(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE - 3, (const uint8_t*)&msgHash, CX_SHA256_SIZE);
-
-    if (err_hash != zxerr_ok || err_sign != zxerr_ok) {
+    if ( err_hash != zxerr_ok || err_sign != zxerr_ok) {
         set_code(G_io_apdu_buffer, 0, APDU_CODE_SIGN_VERIFY_ERROR);
         io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
     } else {

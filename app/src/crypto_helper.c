@@ -42,7 +42,7 @@ static uint32_t crypto_polymod(uint32_t checksum) {
 }
 
 zxerr_t crypto_hashPubkey(const uint8_t * pubKey, uint8_t* buffer, uint8_t bufferLen) {
-    unsigned char hash[32];
+    unsigned char hash[32] = {0};
 
 #if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX)
     cx_sha256_t ctx;
@@ -65,7 +65,7 @@ zxerr_t crypto_hashPubkey(const uint8_t * pubKey, uint8_t* buffer, uint8_t buffe
 }
 
 parser_error_t crypto_hash(const uint8_t * input, uint8_t inputLen, uint8_t* output, uint8_t outputLen) {
-    unsigned char hash[CX_SHA256_SIZE];
+    unsigned char hash[CX_SHA256_SIZE] = {0};
 
     if(outputLen < CX_SHA256_SIZE) {
         return parser_unexpected_buffer_end;
@@ -84,6 +84,41 @@ parser_error_t crypto_hash(const uint8_t * input, uint8_t inputLen, uint8_t* out
 #endif
     MEMCPY(output, hash, sizeof(hash));
     return parser_ok;
+}
+
+zxerr_t crypto_msg_hash(const uint8_t * input, uint8_t inputLen, uint8_t* output, uint8_t outputLen) {
+    unsigned char hash[CX_SHA256_SIZE] = {0};
+
+    if (outputLen < CX_SHA256_SIZE) {
+        return zxerr_buffer_too_small;
+    }
+
+#if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX)
+    cx_sha256_t tmp_ctx = {0};
+    cx_sha256_init(&tmp_ctx);
+
+    uint8_t varint[9] = {0};
+    uint16_t prefixLength = strlen(SIGNED_MESSAGE_PREFIX);
+    uint8_t varintLength = lisk_encode_varint(prefixLength, varint);
+
+    // Hash enconded prefix length and prefix
+    cx_hash(&tmp_ctx.header, 0, varint, varintLength, NULL, 0);
+    cx_hash(&tmp_ctx.header, 0, (unsigned char*)SIGNED_MESSAGE_PREFIX, prefixLength, NULL, 0);
+
+    // End first Hash with message length and message content
+    MEMZERO(varint, sizeof(varint));
+    varintLength = lisk_encode_varint(inputLen, varint);
+    cx_hash(&tmp_ctx.header, 0, varint, varintLength, NULL, 0);
+    cx_hash(&tmp_ctx.header, 0, input , inputLen, NULL, 0);
+    cx_hash(&tmp_ctx.header, CX_LAST, NULL, 0, hash, CX_SHA256_SIZE);
+
+    // Rehash previous hash
+    cx_sha256_t ctx = {0};
+    cx_sha256_init(&ctx);
+    MEMZERO(output, outputLen);
+    cx_hash(&ctx.header, CX_LAST, hash, CX_SHA256_SIZE, output, outputLen);
+#endif 
+    return zxerr_ok;
 }
 
 // Taken from base32 code --> create 5bits numbers from input

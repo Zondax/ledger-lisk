@@ -25,6 +25,8 @@ extern "C" {
 uint8_t lisk_base32_encode(const uint8_t *input, const uint8_t inputLen,
                             uint8_t *output, uint8_t outputLen);
 
+unsigned char lisk_encode_varint(unsigned long int value, unsigned char *dest);
+
 #ifdef __cplusplus
 }
 #endif

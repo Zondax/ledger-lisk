@@ -36,7 +36,13 @@ zxerr_t msg_getItem(int8_t displayIdx,
                      char *outVal, uint16_t outValLen,
                      uint8_t pageIdx, uint8_t *pageCount) {
     ZEMU_LOGF(200, "[msg_getItem] %d/%d\n", displayIdx, pageIdx)
-   
+
+    MEMZERO(outKey, outKeyLen);
+    MEMZERO(outVal, outValLen);
+    snprintf(outKey, outKeyLen, "?");
+    snprintf(outVal, outValLen, " ");
+    *pageCount = 1;
+
     const uint8_t *message = tx_get_buffer();
     const uint16_t messageLength = tx_get_buffer_length();
 
@@ -64,7 +70,7 @@ zxerr_t msg_getItem(int8_t displayIdx,
 
             //print message
             snprintf(outKey, outKeyLen, "Msg");
-            pageString(outVal, outValLen, (const char*)message, pageIdx, pageCount);
+            pageStringExt(outVal, outValLen, (const char*)message, messageLength, pageIdx, pageCount);
             return zxerr_ok;
          }
          default:

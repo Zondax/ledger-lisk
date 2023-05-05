@@ -53,6 +53,7 @@ extern "C" {
 #define MENU_MAIN_APP_LINE2_SECRET          "???"
 #define APPVERSION_LINE1 "Lisk"
 #define APPVERSION_LINE2 "v" APPVERSION
+#define SIGNED_MESSAGE_PREFIX "Lisk Signed Message:\n"
 
 #ifdef __cplusplus
 }

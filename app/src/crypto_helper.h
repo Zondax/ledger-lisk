@@ -37,7 +37,7 @@ zxerr_t crypto_hashPubkey(const uint8_t * pubKey, uint8_t* buffer, uint8_t buffe
 zxerr_t crypto_split_string(const uint8_t *input, const uint8_t inputLen, uint8_t *output, uint8_t outputLen);
 zxerr_t crypto_checksum(const uint8_t * address_5bits, uint8_t* output, uint8_t outputLen);
 zxerr_t crypto_encodePubkey(uint8_t *buffer, uint16_t bufferLen, const uint8_t *pubkey, uint8_t *addrLen);
-
+zxerr_t crypto_msg_hash(const uint8_t * input, uint8_t inputLen, uint8_t* output, uint8_t outputLen);
 #ifdef __cplusplus
 }
 #endif
