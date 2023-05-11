@@ -16,6 +16,7 @@
 
 import Zemu, { DEFAULT_START_OPTIONS } from '@zondax/zemu'
 import { LiskApp } from '@zondax/ledger-lisk'
+import { cryptography } from '@liskhq/lisk-client'
 import {
   APP_SEED,
   models,
@@ -90,9 +91,13 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(message).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
+      // Verificaiton function from lisk lib, takes message and does all
+      // the hashing and varint enconding needed
+      const valid = cryptography.ed.verifyMessageWithPublicKey({
+        message: tx_message,
+        publicKey: Buffer.from(pubKey, 'hex'),
+        signature: signatureResponse.signature,
+      })
       expect(valid).toEqual(true)
     } finally {
       await sim.close()
@@ -123,9 +128,13 @@ describe('Custom', function () {
       expect(signatureResponse.error_message).toEqual('No errors')
 
       // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(message).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
+      // Verificaiton function from lisk lib, takes message and does all
+      // the hashing and varint enconding needed
+      const valid = cryptography.ed.verifyMessageWithPublicKey({
+        message: tx_message_non_printable,
+        publicKey: Buffer.from(pubKey, 'hex'),
+        signature: signatureResponse.signature,
+      })
       expect(valid).toEqual(true)
     } finally {
       await sim.close()
