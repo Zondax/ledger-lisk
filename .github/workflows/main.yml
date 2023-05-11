@@ -76,12 +76,19 @@ jobs:
       - run: sudo apt-get update -y && sudo apt-get install -y libusb-1.0.0 libudev-dev
       - name: Install node
         uses: actions/setup-node@v3
+        with:
+          node-version: '16.14.1'
       - name: Install yarn
         run: |
           npm install -g yarn
-      - name: Build and run zemu tests
-        run: |
-          make test_all
+      - name: Build Ledger app
+        run: make test_all
+      - name: Upload Snapshots (only failure)
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: snapshots-tmp
+          path: tests_zemu/snapshots-tmp/
 
   build_package_nanos:
     needs: [configure, build, build_ledger, test_zemu]
