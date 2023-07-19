@@ -30,6 +30,8 @@ extern "C" {
 #define HDPATH_3_DEFAULT     (0u)
 #define HDPATH_4_DEFAULT     (0u)
 
+#define INS_SIGN_MSG                    0x03
+
 #define SECP256K1_PK_LEN            65u
 
 #define SK_LEN_25519 64u
