@@ -16,7 +16,6 @@
 
 import Zemu, { DEFAULT_START_OPTIONS } from '@zondax/zemu'
 import { LiskApp } from '@zondax/ledger-lisk'
-import { cryptography } from '@liskhq/lisk-client'
 import {
   APP_SEED,
   models,
@@ -28,7 +27,6 @@ import {
   tx_pos_stake,
   tx_legacy_reclaim,
   tx_message,
-  tx_message_non_printable,
   tx_pos_regValidator,
   tx_legacy_registerkeys,
   tx_interop_main_cc,
@@ -39,6 +37,7 @@ import {
   tx_interop_msg_recovery_init,
   tx_interop_state_recovery,
   tx_interop_state_recovery_init,
+  tx_message_wrong,
 } from './common'
 
 // @ts-expect-error
@@ -57,97 +56,85 @@ const hdpath = `m/44'/134'/0'`
 
 jest.setTimeout(300000)
 
-describe('Custom', function () {
-  test.concurrent.each(models)('can start and stop container', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-    } finally {
-      await sim.close()
-    }
-  })
+const TXNS = [
+  {
+    name: 'sign_token_transfer',
+    blob: tx_token_transfer,
+  },
+  {
+    name: 'sign_crosschain_transfer',
+    blob: tx_crosschain_transfer,
+  },
+  {
+    name: 'sign_auth_multisig',
+    blob: tx_auth_multisig,
+  },
+  {
+    name: 'sign_pos_report_mis',
+    blob: tx_pos_report_mis,
+  },
+  {
+    name: 'sign_pos_unlock',
+    blob: tx_pos_unlock,
+  },
+  {
+    name: 'sign_pos_stake',
+    blob: tx_pos_stake,
+  },
+  {
+    name: 'sign_legacy_reclaim',
+    blob: tx_legacy_reclaim,
+  },
+  {
+    name: 'sign_pos_regValidator',
+    blob: tx_pos_regValidator,
+  },
+  {
+    name: 'sign_legacy_registerkeys',
+    blob: tx_legacy_registerkeys,
+  },
+  {
+    name: 'sign_interop_main_cc',
+    blob: tx_interop_main_cc,
+  },
+  {
+    name: 'sign_interop_side_cc',
+    blob: tx_interop_side_cc,
+  },
+  {
+    name: 'sign_interop_side_reg',
+    blob: tx_interop_side_reg,
+  },
+  {
+    name: 'sign_interop_main_reg',
+    blob: tx_interop_main_reg,
+  },
+  {
+    name: 'sign_interop_msg_recovery',
+    blob: tx_interop_msg_recovery,
+  },
+  {
+    name: 'sign_interop_msg_recovery_init',
+    blob: tx_interop_msg_recovery_init,
+  },
+  {
+    name: 'sign_interop_state_recovery',
+    blob: tx_interop_state_recovery,
+  },
+  {
+    name: 'sign_interop_state_recovery_init',
+    blob: tx_interop_state_recovery_init,
+  },
+]
 
-  test.concurrent.each(models)('sign message', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const message = Buffer.from(tx_message)
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.signMessage(hdpath, message)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_message`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      // Verificaiton function from lisk lib, takes message and does all
-      // the hashing and varint enconding needed
-      const valid = cryptography.ed.verifyMessageWithPublicKey({
-        message: tx_message,
-        publicKey: Buffer.from(pubKey, 'hex'),
-        signature: signatureResponse.signature,
-      })
-      expect(valid).toEqual(true)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign message - non printable', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const message = Buffer.from(tx_message_non_printable)
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.signMessage(hdpath, message)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_message_non_printable`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      // Verificaiton function from lisk lib, takes message and does all
-      // the hashing and varint enconding needed
-      const valid = cryptography.ed.verifyMessageWithPublicKey({
-        message: tx_message_non_printable,
-        publicKey: Buffer.from(pubKey, 'hex'),
-        signature: signatureResponse.signature,
-      })
-      expect(valid).toEqual(true)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign token transfer', async function (m) {
+describe.each(TXNS)('Custom', function (data) {
+  test.concurrent.each(models)(`Test: ${data.name}`, async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
       const app = new LiskApp(sim.getTransport())
 
-      const txBlob = Buffer.from(tx_token_transfer, 'hex')
+      const txBlob = Buffer.from(data.blob, 'hex')
       const responseAddr = await app.getAddressAndPubKey(hdpath)
       const pubKey = responseAddr.pubKey
 
@@ -156,7 +143,7 @@ describe('Custom', function () {
 
       // Wait until we are not in the main menu
       await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_token_transfer`)
+      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-${data.name}`)
 
       const signatureResponse = await signatureRequest
       console.log(signatureResponse)
@@ -175,18 +162,16 @@ describe('Custom', function () {
     }
   })
 
-  test.concurrent.each(models)('sign token transfer expert', async function (m) {
+  test.concurrent.each(models)(`Test: ${data.name} expert`, async function (m) {
     const sim = new Zemu(m.path)
     try {
       await sim.start({ ...defaultOptions, model: m.name })
       const app = new LiskApp(sim.getTransport())
 
       // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
+      await sim.toggleExpertMode()
 
-      const txBlob = Buffer.from(tx_token_transfer, 'hex')
+      const txBlob = Buffer.from(data.blob, 'hex')
       const responseAddr = await app.getAddressAndPubKey(hdpath)
       const pubKey = responseAddr.pubKey
 
@@ -195,7 +180,7 @@ describe('Custom', function () {
 
       // Wait until we are not in the main menu
       await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_token_transfer_expert`)
+      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-${data.name}_expert`)
 
       const signatureResponse = await signatureRequest
       console.log(signatureResponse)
@@ -213,1175 +198,57 @@ describe('Custom', function () {
       await sim.close()
     }
   })
-
-  test.concurrent.each(models)('sign crosschain transfer', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_crosschain_transfer, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_crosschain_transfer`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign crosschain transfer expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_crosschain_transfer, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_crosschain_transfer_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign register multisignature', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_auth_multisig, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_auth_multisig`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign register multisignature expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_auth_multisig, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_auth_multisig_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign pos register validator', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_pos_regValidator, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_pos_reg_validator`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign pos register validator expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_pos_regValidator, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_pos_reg_validator_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign pos stake', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_pos_stake, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_pos_stake`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign pos stake expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_pos_stake, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_pos_stake_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign pos unlock', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_pos_unlock, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_pos_unlock`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign pos unlock expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_pos_unlock, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_pos_unlock_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign pos report misbehavior', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_pos_report_mis, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_pos_report_mis`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign report mish expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_pos_report_mis, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_pos_report_mis_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign legacy reclaim', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_legacy_reclaim, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_legacy_reclaim`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      console.log(msgHash)
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign legacy reclaim expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_legacy_reclaim, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_legacy_reclaim_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign legacy register keys', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_legacy_registerkeys, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_legacy_register_keys`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign legacy register keys expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_legacy_registerkeys, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_legacy_register_keys_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop mainchain CC update', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_interop_main_cc, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_main_cc_update`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop mainchain CC update expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_interop_main_cc, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_main_cc_update_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop sidechain CC update', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_interop_side_cc, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_side_cc_update`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop sidechain CC update expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_interop_side_cc, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_side_cc_update_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop main register', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_interop_main_reg, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_main_reg`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop mainchain register expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_interop_main_reg, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_main_reg_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop sidechain register', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_interop_side_reg, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_side_reg`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop sidechain register expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_interop_side_reg, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_side_reg_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop msg recovery', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_interop_msg_recovery, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_msg_recovery`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop msg recovery expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_interop_msg_recovery, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_msg_recovey_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop msg recovery init', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_interop_msg_recovery_init, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_msg_init_recovery`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop msg recovery init expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_interop_msg_recovery_init, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_msg_recovey_init_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop state recovery', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_interop_state_recovery, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_state_recovery`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop state recovery expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_interop_state_recovery, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_state_recovey_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop state recovery init', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      const txBlob = Buffer.from(tx_interop_state_recovery_init, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_state_init_recovery`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
-
-  test.concurrent.each(models)('sign interop state recovery init expert', async function (m) {
-    const sim = new Zemu(m.path)
-    try {
-      await sim.start({ ...defaultOptions, model: m.name })
-      const app = new LiskApp(sim.getTransport())
-
-      // Change to expert mode so we can skip fields
-      await sim.clickRight()
-      await sim.clickBoth()
-      await sim.clickLeft()
-
-      const txBlob = Buffer.from(tx_interop_state_recovery_init, 'hex')
-      const responseAddr = await app.getAddressAndPubKey(hdpath)
-      const pubKey = responseAddr.pubKey
-
-      // do not wait here.. we need to navigate
-      const signatureRequest = app.sign(hdpath, txBlob)
-
-      // Wait until we are not in the main menu
-      await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
-      await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_interop_state_recovey_init_expert`)
-
-      const signatureResponse = await signatureRequest
-      console.log(signatureResponse)
-
-      expect(signatureResponse.return_code).toEqual(0x9000)
-      expect(signatureResponse.error_message).toEqual('No errors')
-
-      // Now verify the signature
-      const hash = crypto.createHash('sha256')
-      const msgHash = hash.update(txBlob).digest()
-      console.log(msgHash)
-
-      const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
-      expect(valid).toEqual(true)
-      console.log(valid)
-    } finally {
-      await sim.close()
-    }
-  })
+})
+
+test.concurrent.each(models)('sign message', async function (m) {
+  const sim = new Zemu(m.path)
+  try {
+    await sim.start({ ...defaultOptions, model: m.name })
+    const app = new LiskApp(sim.getTransport())
+
+    const message = Buffer.from(tx_message)
+    const responseAddr = await app.getAddressAndPubKey(hdpath)
+    const pubKey = responseAddr.pubKey
+
+    // do not wait here.. we need to navigate
+    const signatureRequest = app.signMessage(hdpath, message)
+
+    // Wait until we are not in the main menu
+    await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot())
+    await sim.compareSnapshotsAndApprove('.', `${m.prefix.toLowerCase()}-sign_message`)
+
+    const signatureResponse = await signatureRequest
+    console.log(signatureResponse)
+
+    expect(signatureResponse.return_code).toEqual(0x9000)
+    expect(signatureResponse.error_message).toEqual('No errors')
+
+    const hash = crypto.createHash('sha256')
+    const msgHash = hash.update(message).digest()
+    const valid = ed25519.verify(signatureResponse.signature, msgHash, pubKey)
+    expect(valid).toEqual(true)
+    console.log(valid)
+  } finally {
+    await sim.close()
+  }
+})
+
+test.concurrent.each(models)('sign message invalid', async function (m) {
+  const sim = new Zemu(m.path)
+  try {
+    await sim.start({ ...defaultOptions, model: m.name })
+    const app = new LiskApp(sim.getTransport())
+
+    const message = Buffer.from(tx_message_wrong)
+
+    // do not wait here.. we need to navigate
+    const signatureResponse = await app.signMessage(hdpath, message)
+
+    console.log(signatureResponse)
+
+    expect(signatureResponse.return_code).toEqual(0x6984)
+    expect(signatureResponse.error_message).toEqual('Data is invalid : Unexpected tag init')
+  } finally {
+    await sim.close()
+  }
 })
