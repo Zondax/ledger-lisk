@@ -52,7 +52,7 @@ zxerr_t crypto_hashPubkey(const uint8_t * pubKey, uint8_t* buffer, uint8_t buffe
     }
     memset(&ctx, 0, sizeof(ctx));
     cx_sha256_init(&ctx);
-    cx_hash(&ctx.header, CX_LAST, pubKey, PK_LEN_25519, hash, sizeof(hash));
+    cx_hash_no_throw(&ctx.header, CX_LAST, pubKey, PK_LEN_25519, hash, sizeof(hash));
 #else
     picohash_ctx_t ctx;
     picohash_init_sha256(&ctx);
@@ -75,7 +75,7 @@ parser_error_t crypto_hash(const uint8_t * input, uint8_t inputLen, uint8_t* out
     cx_sha256_t ctx;
     memset(&ctx, 0, sizeof(ctx));
     cx_sha256_init(&ctx);
-    cx_hash(&ctx.header, CX_LAST, input, inputLen, hash, sizeof(hash));
+    cx_hash_no_throw(&ctx.header, CX_LAST, input, inputLen, hash, sizeof(hash));
 #else
     picohash_ctx_t ctx;
     picohash_init_sha256(&ctx);
@@ -102,22 +102,22 @@ zxerr_t crypto_msg_hash(const uint8_t * input, uint8_t inputLen, uint8_t* output
     uint8_t varintLength = lisk_encode_varint(prefixLength, varint);
 
     // Hash enconded prefix length and prefix
-    cx_hash(&tmp_ctx.header, 0, varint, varintLength, NULL, 0);
-    cx_hash(&tmp_ctx.header, 0, (unsigned char*)SIGNED_MESSAGE_PREFIX, prefixLength, NULL, 0);
+    cx_hash_no_throw(&tmp_ctx.header, 0, varint, varintLength, NULL, 0);
+    cx_hash_no_throw(&tmp_ctx.header, 0, (unsigned char*)SIGNED_MESSAGE_PREFIX, prefixLength, NULL, 0);
 
     // End first Hash with message length and message content
     MEMZERO(varint, sizeof(varint));
     varintLength = lisk_encode_varint(inputLen, varint);
-    cx_hash(&tmp_ctx.header, 0, varint, varintLength, NULL, 0);
-    cx_hash(&tmp_ctx.header, 0, input , inputLen, NULL, 0);
-    cx_hash(&tmp_ctx.header, CX_LAST, NULL, 0, hash, CX_SHA256_SIZE);
+    cx_hash_no_throw(&tmp_ctx.header, 0, varint, varintLength, NULL, 0);
+    cx_hash_no_throw(&tmp_ctx.header, 0, input , inputLen, NULL, 0);
+    cx_hash_no_throw(&tmp_ctx.header, CX_LAST, NULL, 0, hash, CX_SHA256_SIZE);
 
     // Rehash previous hash
     cx_sha256_t ctx = {0};
     cx_sha256_init(&ctx);
     MEMZERO(output, outputLen);
-    cx_hash(&ctx.header, CX_LAST, hash, CX_SHA256_SIZE, output, outputLen);
-#endif 
+    cx_hash_no_throw(&ctx.header, CX_LAST, hash, CX_SHA256_SIZE, output, outputLen);
+#endif
     return zxerr_ok;
 }
 
