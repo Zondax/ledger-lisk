@@ -77,14 +77,6 @@ parser_error_t parser_get_tag_chain(parser_context_t *ctx) {
     }
     ctx->offset += strlen(TAG_INIT);
 
-    while (ctx->offset < ctx->bufferLen) {
-        if ( *(ctx->buffer + ctx->offset) == '_') {
-            ctx->offset++;
-            break;
-        }
-        ctx->offset++;
-    }
-
     if(ctx->offset >= ctx->bufferLen) {
         return parser_unexpected_tag_init;
     }
@@ -258,7 +250,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
                     break;
             }
             break;
-            
+
         default:
             return parser_unexpected_value;
             break;

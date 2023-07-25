@@ -48,7 +48,7 @@ extern "C" {
 #define COIN_TICKER "LSK "
 #define UNSTAKE_COIN_TICKER "LSK -"
 #define COIN_HRP "lsk"
-#define TAG_INIT "LSK_"
+#define TAG_INIT "LSK_TX_"
 
 #define MENU_MAIN_APP_LINE1 "Lisk"
 #define MENU_MAIN_APP_LINE2 "Ready"
