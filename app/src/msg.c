@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include "coin.h"
+#include "parser_impl.h"
 #include "zxerror.h"
 #include "zxmacros.h"
 #include "zxformat.h"
@@ -24,6 +25,18 @@
 #include "parser_utils.h"
 #include "crypto_helper.h"
 #include "tx.h"
+
+const char *msg_parse() {
+    const uint8_t *data = tx_get_buffer();
+    const size_t dataLen = tx_get_buffer_length();
+    if (data == NULL || dataLen == 0) {
+        return parser_getErrorDescription(parser_no_data);
+    }
+    if (MEMCMP(data, TAG_INIT, strlen(TAG_INIT)) == 0) {
+        return parser_getErrorDescription(parser_unexpected_tag_init);
+    }
+    return NULL;
+}
 
 zxerr_t msg_getNumItems(uint8_t *num_items) {
     zemu_log_stack("msg_getNumItems");
@@ -46,35 +59,20 @@ zxerr_t msg_getItem(int8_t displayIdx,
     const uint8_t *message = tx_get_buffer();
     const uint16_t messageLength = tx_get_buffer_length();
 
-    if(messageLength == 0) {
+    if (messageLength == 0) {
         return zxerr_no_data;
     }
 
-     switch (displayIdx) {
-         case 0: {
-            snprintf(outKey, outKeyLen, "Msg hex");
-            uint8_t npc = 0; //Non Printable Chars Counter
-            
-            for (uint8_t i=0; i < messageLength; i++) {
-                npc += IS_PRINTABLE(message[i]) ?
-                    0 /* Printable Char */:
-                    1 /* Non Printable Char */;
-            }
+    uint8_t tmp_hash[32] = {0};
+    crypto_hash(message, messageLength, tmp_hash, sizeof(tmp_hash));
 
-            // msg in hex in case >= than 40% is non printable
-            // or first char is not printable.
-            if ((npc*100) / messageLength >= 40 || ! IS_PRINTABLE(message[0])) {
-                pageStringHex(outVal, outValLen, (const char*)message, messageLength, pageIdx, pageCount);
-                return zxerr_ok;
-            }
-
-            //print message
-            snprintf(outKey, outKeyLen, "Msg");
-            pageStringExt(outVal, outValLen, (const char*)message, messageLength, pageIdx, pageCount);
+    switch (displayIdx) {
+        case 0: {
+            snprintf(outKey, outKeyLen, "Msg sign");
+            pageStringHex(outVal, outValLen, (const char*)tmp_hash, sizeof(tmp_hash), pageIdx, pageCount);
             return zxerr_ok;
-         }
-         default:
-             return zxerr_no_data;
-     }
-
+        }
+        default:
+            return zxerr_no_data;
+    }
 }

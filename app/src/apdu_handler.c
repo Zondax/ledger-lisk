@@ -32,9 +32,6 @@
 #include "coin.h"
 #include "zxmacros.h"
 
-#define REVIEW_ADDRESS 0x01
-#define REVIEW_TXN 0x02
-
 #define CHECK_PIN_VALIDATED() \
 if( os_global_pin_is_validated() != BOLOS_UX_OK ) { \
     THROW(APDU_CODE_COMMAND_NOT_ALLOWED); \
@@ -152,8 +149,15 @@ __Z_INLINE void handleSignMessage(volatile uint32_t *flags, volatile uint32_t *t
     if (!process_chunk(tx, rx)) {
         THROW(APDU_CODE_OK);
     }
+    const char *error_msg = msg_parse();
+    if (error_msg != NULL) {
+        int error_msg_length = strlen(error_msg);
+        memcpy(G_io_apdu_buffer, error_msg, error_msg_length);
+        *tx += (error_msg_length);
+        THROW(APDU_CODE_DATA_INVALID);
+    }
 
-    view_review_init(msg_getItem, msg_getNumItems, app_sign_message);
+    view_review_init(msg_getItem, msg_getNumItems, app_sign);
     view_review_show(REVIEW_TXN);
     *flags |= IO_ASYNCH_REPLY;
 }
