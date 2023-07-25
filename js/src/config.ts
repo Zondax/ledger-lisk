@@ -14,10 +14,10 @@
  *  limitations under the License.
  ******************************************************************************* */
 export const CLA = 0x60;
-export const INS = {
-  GET_VERSION: 0x00,
-  GET_ADDR_PUBKEY: 0x01,
-  SIGN_TXN: 0x02,
-  SIGN_MSG: 0x03,
-};
+export const enum INS {
+  GET_VERSION = 0x00,
+  GET_ADDR_PUBKEY = 0x01,
+  SIGN_TXN = 0x02,
+  SIGN_MSG = 0x03,
+}
 export const PKLEN = 32;
