@@ -1,6 +1,6 @@
 #*******************************************************************************
 #  Ledger App
-#  (c) 2018 - 2022 Zondax AG
+#  (c) 2019 - 2023 Zondax AG
 #  (c) 2017 Ledger
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,9 +78,6 @@ CFLAGS += -Wvla
 rust:
 	@echo "No rust code"
 
-# Before linking, we need to be sure rust lib is there
-bin/app.elf: rust
-
 .PHONY: rust_clean
 rust_clean:
 	@echo "No rust code"
@@ -95,6 +92,7 @@ include $(BOLOS_SDK)/Makefile.rules
 #add dependency on custom makefile filename
 dep/%.d: %.c Makefile
 
+.PHONY: listvariants
 listvariants:
 	@echo VARIANTS COIN LSK
 
