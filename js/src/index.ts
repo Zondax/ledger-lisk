@@ -209,7 +209,7 @@ export class LiskApp {
       .then(processGetAddrResponse, processErrorResponse);
   }
 
-  async signSendChunk(chunkIdx: number, chunkNum: number, chunk: Buffer, ins: number): Promise<ResponseSign> {
+  async signSendChunk(chunkIdx: number, chunkNum: number, chunk: Buffer, ins: INS): Promise<ResponseSign> {
     let payloadType = PAYLOAD_TYPE.ADD;
     if (chunkIdx === 1) {
       payloadType = PAYLOAD_TYPE.INIT;
@@ -259,12 +259,12 @@ export class LiskApp {
       }, processErrorResponse);
   }
 
-  async sign(path: string, message: Buffer) {
+  private async signImpl(path: string, message: Buffer, ins: INS) {
     return await this.signGetChunks(path, message).then(async (chunks) => {
-      return await this.signSendChunk(1, chunks.length, chunks[0], INS.SIGN_TXN).then(async (result) => {
+      return await this.signSendChunk(1, chunks.length, chunks[0], ins).then(async (result) => {
         for (let i = 1; i < chunks.length; i += 1) {
           // eslint-disable-next-line no-await-in-loop,no-param-reassign
-          result = await this.signSendChunk(1 + i, chunks.length, chunks[i], INS.SIGN_TXN);
+          result = await this.signSendChunk(1 + i, chunks.length, chunks[i], ins);
           if (result.return_code !== ERROR_CODE.NoError) {
             break;
           }
@@ -279,24 +279,12 @@ export class LiskApp {
     });
   }
 
-  async signMessage(path: string, message: Buffer) {
-    return await this.signGetChunks(path, message).then(async (chunks) => {
-      return await this.signSendChunk(1, chunks.length, chunks[0], INS.SIGN_MSG).then(async (result) => {
-        for (let i = 1; i < chunks.length; i += 1) {
-          // eslint-disable-next-line no-await-in-loop,no-param-reassign
-          result = await this.signSendChunk(1 + i, chunks.length, chunks[i], INS.SIGN_MSG);
-          if (result.return_code !== ERROR_CODE.NoError) {
-            break;
-          }
-        }
+  async sign(path: string, message: Buffer) {
+    return await this.signImpl(path, message, INS.SIGN_TXN);
+  }
 
-        return {
-          return_code: result.return_code,
-          error_message: result.error_message,
-          signature: result.signature,
-        };
-      }, processErrorResponse);
-    });
+  async signMessage(path: string, message: Buffer) {
+    return await this.signImpl(path, message, INS.SIGN_MSG);
   }
 }
 

@@ -34,3 +34,26 @@ uint8_t lisk_base32_encode(const uint8_t *input, const uint8_t inputLen,
 
     return inputLen;
 }
+
+unsigned char lisk_encode_varint(unsigned long int value, unsigned char *dest) {
+    uint8_t tmp;
+    if (value <= 0xfc) {
+        memmove(dest, &value, 1);
+        return 1;
+    } else if (value <= UINT16_MAX) {
+        tmp = 0xfd;
+        memmove(dest, &tmp, 1);
+        memmove(dest + 1, &value, 2);
+        return 3;
+    } else {
+        tmp = 0xfe;
+        memmove(dest, &tmp, 1);
+        memmove(dest + 1, &value, 4);
+        return 5;
+    }
+
+    tmp = 0xff;
+    memmove(dest, &tmp, 1);
+    memmove(dest + 1, &value, 8);
+    return 9;
+}

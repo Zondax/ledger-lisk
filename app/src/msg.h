@@ -19,6 +19,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "zxerror.h"
+
+const char *msg_parse();
 
 // Return the number of items in the address view
 zxerr_t msg_getNumItems(uint8_t *num_items);

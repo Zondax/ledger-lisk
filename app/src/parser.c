@@ -71,19 +71,11 @@ parser_error_t parser_init_context(parser_context_t *ctx,
     return parser_ok;
 }
 
-parser_error_t parser_get_tag_chain(parser_context_t *ctx, parser_tx_t *tx_obj) {
+parser_error_t parser_get_tag_chain(parser_context_t *ctx) {
     if (MEMCMP(ctx->buffer, TAG_INIT, strlen(TAG_INIT)) != 0) {
         return parser_unexpected_tag_init;
     }
     ctx->offset += strlen(TAG_INIT);
-
-    while (ctx->offset < ctx->bufferLen) {
-        if ( *(ctx->buffer + ctx->offset) == '_') {
-            ctx->offset++;
-            break;
-        }
-        ctx->offset++;
-    }
 
     if(ctx->offset >= ctx->bufferLen) {
         return parser_unexpected_tag_init;
@@ -97,7 +89,7 @@ parser_error_t parser_parse(parser_context_t *ctx,
                             size_t dataLen,
                             parser_tx_t *tx_obj) {
     CHECK_ERROR(parser_init_context(ctx, data, dataLen))
-    CHECK_ERROR(parser_get_tag_chain(ctx, tx_obj))
+    CHECK_ERROR(parser_get_tag_chain(ctx))
 
     ctx->tx_obj = tx_obj;
     return _read(ctx, tx_obj);
@@ -141,7 +133,7 @@ static parser_error_t checkSanity(uint8_t numItems, uint8_t displayIdx) {
     return parser_ok;
 }
 
-parser_error_t parser_getTxNumItems(const parser_context_t *ctx, uint8_t *tx_num_items) {
+parser_error_t parser_getTxNumItems(__Z_UNUSED const parser_context_t *ctx, uint8_t *tx_num_items) {
     *tx_num_items = _getTxNumItems();
     return parser_ok;
 }
@@ -226,31 +218,42 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
         case TX_MODULE_ID_INTEROP:
             switch (ctx->tx_obj->command_id) {
                 case TX_COMMAND_ID_MAINCHAIN_CC_UPDATE:
+                    __attribute__((fallthrough));
                 case TX_COMMAND_ID_SIDECHAIN_CC_UPDATE:
                     return print_module_interop_CCupdate(ctx, displayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
+                    break;
                 case TX_COMMAND_ID_MAINCHAIN_REG:
                     PRINT_STANDARD_FIELDS("OwnChainID", ctx->tx_obj->tx_command._interop_mainchain_register.ownChainId, OWNCHAIN_ID_LENGTH,
                                           "OwnName", ctx->tx_obj->tx_command._interop_mainchain_register.ownName,
                                           ctx->tx_obj->tx_command._interop_mainchain_register.ownNameLen);
+                    break;
                 case TX_COMMAND_ID_MSG_RECOVERY:
+                    __attribute__((fallthrough));
                 case TX_COMMAND_ID_MSG_RECOVERY_INIT:
+                    __attribute__((fallthrough));
                 case TX_COMMAND_ID_STATE_RECOVERY_INIT:
                     return print_module_interop_chainID(ctx, displayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
+                    break;
                 case TX_COMMAND_ID_STATE_RECOVERY:
                     PRINT_STANDARD_FIELDS("ChainID", ctx->tx_obj->tx_command._interop_recover_state.chainID, OWNCHAIN_ID_LENGTH,
                                           "Module", ctx->tx_obj->tx_command._interop_recover_state.module,
                                           ctx->tx_obj->tx_command._interop_recover_state.moduleLen);
+                    break;
                 case TX_COMMAND_ID_SIDECHAIN_REG:
                     return print_module_sidechain_register(ctx, displayIdx, outKey, outKeyLen,
                                       outVal, outValLen, pageIdx, pageCount);
+                    break;
                 default:
                     return parser_unexpected_value;
+                    break;
             }
+            break;
 
         default:
             return parser_unexpected_value;
+            break;
 
     }
 

@@ -7,15 +7,17 @@ export const APP_SEED = 'equip will roof matter pink blind book anxiety banner e
 const APP_PATH_S = resolve('../app/output/app_s.elf')
 const APP_PATH_X = resolve('../app/output/app_x.elf')
 const APP_PATH_SP = resolve('../app/output/app_s2.elf')
+const APP_PATH_ST = resolve('../app/output/app_stax.elf')
 
 export const models: IDeviceModel[] = [
   { name: 'nanos', prefix: 'S', path: APP_PATH_S },
   { name: 'nanox', prefix: 'X', path: APP_PATH_X },
   { name: 'nanosp', prefix: 'SP', path: APP_PATH_SP },
+  { name: 'stax', prefix: 'ST', path: APP_PATH_ST },
 ]
 
 export const tx_message = 'Just a dummy message to be signed'
-export const tx_message_non_printable = '\n Just a dummy message to be signed'
+export const tx_message_wrong = 'LSK_TX_ This Message is Invalid'
 export const tx_token_transfer =
   '4c534b5f54585f000000000a05746f6b656e12087472616e7366657218acd4a4ce96bcebff5020f6ff9d88cec497b1fc012a20bfbef2a36e17ca75b66fd56adea8dd04ed234cd4188aca42fc8a7299d8eaadd832690a08b3421e3e6bbcac2310d4a9bcf586afbddd96011a14ded9bcbc502507685693292562e514b8ee5883ab223c6f6265792075736566756c20616369642072656e65772075736520646f63746f72207072657061726520666c75696420726162626974207369656765'
 export const tx_crosschain_transfer =

@@ -22,7 +22,7 @@
 
 #define SHA256_LENGTH 32
 
-#if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX)
+#if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX) || defined(TARGET_STAX)
     #include "cx.h"
 #else
     #include "picohash.h"
@@ -42,9 +42,9 @@ static uint32_t crypto_polymod(uint32_t checksum) {
 }
 
 zxerr_t crypto_hashPubkey(const uint8_t * pubKey, uint8_t* buffer, uint8_t bufferLen) {
-    unsigned char hash[32];
+    unsigned char hash[32] = {0};
 
-#if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX)
+#if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX) || defined(TARGET_STAX)
     cx_sha256_t ctx;
 
     if(bufferLen < PUBKEY_HASH_LEN) {
@@ -52,7 +52,7 @@ zxerr_t crypto_hashPubkey(const uint8_t * pubKey, uint8_t* buffer, uint8_t buffe
     }
     memset(&ctx, 0, sizeof(ctx));
     cx_sha256_init(&ctx);
-    cx_hash(&ctx.header, CX_LAST, pubKey, PK_LEN_25519, hash, sizeof(hash));
+    cx_hash_no_throw(&ctx.header, CX_LAST, pubKey, PK_LEN_25519, hash, sizeof(hash));
 #else
     picohash_ctx_t ctx;
     picohash_init_sha256(&ctx);
@@ -65,17 +65,17 @@ zxerr_t crypto_hashPubkey(const uint8_t * pubKey, uint8_t* buffer, uint8_t buffe
 }
 
 parser_error_t crypto_hash(const uint8_t * input, uint8_t inputLen, uint8_t* output, uint8_t outputLen) {
-    unsigned char hash[CX_SHA256_SIZE];
+    unsigned char hash[CX_SHA256_SIZE] = {0};
 
     if(outputLen < CX_SHA256_SIZE) {
         return parser_unexpected_buffer_end;
     }
 
-#if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX)
+#if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX) || defined(TARGET_STAX)
     cx_sha256_t ctx;
     memset(&ctx, 0, sizeof(ctx));
     cx_sha256_init(&ctx);
-    cx_hash(&ctx.header, CX_LAST, input, inputLen, hash, sizeof(hash));
+    cx_hash_no_throw(&ctx.header, CX_LAST, input, inputLen, hash, sizeof(hash));
 #else
     picohash_ctx_t ctx;
     picohash_init_sha256(&ctx);
