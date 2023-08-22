@@ -22,6 +22,8 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
+extern const char TAG_INIT[7];
+
 #define ENCODED_PUB_KEY 32
 #define ADDRESS_HASH_LENGTH 20 // sha256(pubkey) -> first 20 bytes
 #define ADDRESS_LISK32_LENGTH 41 // "lsk" + lisk32 encoded
@@ -102,20 +104,20 @@ typedef enum token_crosschain_fields {
 typedef enum auth_multi_fields {
   AUTH_MULTI_NSIGS_TYPE = 0,
   AUTH_MULTI_KEY_TYPE,
-  AUTH_MULTI_OPTKEY_TYPE,  
-  AUTH_MULTI_SIG_TYPE,     
+  AUTH_MULTI_OPTKEY_TYPE,
+  AUTH_MULTI_SIG_TYPE,
 } auth_multi_fields;
 
 typedef enum pos_stake_fields {
   POS_STAKE_ADDRESS_TYPE = 0,
-  POS_STAKE_AMOUNT_TYPE, 
+  POS_STAKE_AMOUNT_TYPE,
 } pos_stake_fields;
 
 typedef enum pos_reg_validator_fields {
   POS_REG_VALIDATOR_NAME_TYPE = 0,
   POS_REG_VALIDATOR_GENKEY_TYPE,
   POS_REG_VALIDATOR_BLSKEY_TYPE,
-  POS_REG_VALIDATOR_POP_TYPE, 
+  POS_REG_VALIDATOR_POP_TYPE,
 } pos_reg_validator_fields;
 
 typedef enum interop_mainchain_reg_fields {
@@ -125,13 +127,13 @@ typedef enum interop_mainchain_reg_fields {
 
 typedef enum interop_sidechain_reg_fields {
   INTEROP_SIDE_REG_NAME_TYPE = 0,
-  INTEROP_SIDE_REG_CHAIN_ID_TYPE 
+  INTEROP_SIDE_REG_CHAIN_ID_TYPE
 } interop_sidechain_reg_fields;
 
 typedef enum legacy_registerKeys_fields {
   LEGACY_REGISTER_KEYS_GENKEY_TYPE = 0,
   LEGACY_REGISTER_KEYS_BLSKEY_TYPE,
-  LEGACY_REGISTER_KEYS_POP_TYPE, 
+  LEGACY_REGISTER_KEYS_POP_TYPE,
 } legacy_registerKeys_fields;
 
 typedef struct {
@@ -140,7 +142,7 @@ typedef struct {
 } string_subst_t;
 
 typedef struct tx_command_token_transfer {
-  const uint8_t *tokenid; 
+  const uint8_t *tokenid;
   uint64_t amount;
   uint8_t recipientAddress[ADDRESS_HASH_LENGTH];
   const uint8_t *data;
@@ -148,7 +150,7 @@ typedef struct tx_command_token_transfer {
 } tx_command_token_transfer_t;
 
 typedef struct tx_command_token_crosschain_transfer {
-  const uint8_t *tokenid; 
+  const uint8_t *tokenid;
   uint64_t amount;
   const uint8_t *receivingChainID;
   uint8_t recipientAddress[ADDRESS_HASH_LENGTH];

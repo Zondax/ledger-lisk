@@ -22,13 +22,10 @@
 #include "app_mode.h"
 
 static parser_error_t parse_reg_multisign_group(parser_context_t *ctx, tx_command_auth_multisig_group_t *transfer) {
-    
+
     uint64_t n_sigs = 0;
     uint64_t tmp64 = 0;
     uint64_t keytype = 0x0;
-
-    // commands is serialized as bytes, varint first for the size
-    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     // Read number of signatures
     GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -127,7 +124,7 @@ parser_error_t print_module_auth_reg(const parser_context_t *ctx,
         case AUTH_MULTI_KEY_TYPE: {
             const uint8_t tmpIdx = displayIdx - 1;
             snprintf(outKey, outKeyLen, "Key %d", tmpIdx);
-            array_to_hexstr((char*) &element_str, sizeof(element_str), ctx->tx_obj->tx_command._reg_multisign_group.mandatoryKeys+(tmpIdx*(2+ ED25519_PUBLIC_KEY_LENGTH)), 
+            array_to_hexstr((char*) &element_str, sizeof(element_str), ctx->tx_obj->tx_command._reg_multisign_group.mandatoryKeys+(tmpIdx*(2+ ED25519_PUBLIC_KEY_LENGTH)),
             ED25519_PUBLIC_KEY_LENGTH);
             pageString(outVal, outValLen, (const char*) &element_str, pageIdx, pageCount);
             return parser_ok;
@@ -136,7 +133,7 @@ parser_error_t print_module_auth_reg(const parser_context_t *ctx,
         case AUTH_MULTI_OPTKEY_TYPE: {
             const uint8_t tmpIdx = (displayIdx - ctx->tx_obj->tx_command._reg_multisign_group.n_mandatoryKeys) - 1;
             snprintf(outKey, outKeyLen, "OptKey %d", tmpIdx);
-            array_to_hexstr((char*) &element_str, sizeof(element_str), ctx->tx_obj->tx_command._reg_multisign_group.optionalKeys+(tmpIdx*(2+ ED25519_PUBLIC_KEY_LENGTH)), 
+            array_to_hexstr((char*) &element_str, sizeof(element_str), ctx->tx_obj->tx_command._reg_multisign_group.optionalKeys+(tmpIdx*(2+ ED25519_PUBLIC_KEY_LENGTH)),
             ED25519_PUBLIC_KEY_LENGTH);
             pageString(outVal, outValLen, (const char*) &element_str, pageIdx, pageCount);
             return parser_ok;

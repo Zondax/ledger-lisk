@@ -22,9 +22,10 @@ static const char* liskBase32 = "zxvcpmbn3465o978uyrtkqew2adsjhfg";
 uint8_t lisk_base32_encode(const uint8_t *input, const uint8_t inputLen,
                             uint8_t *output, uint8_t outputLen) {
 
-    if (!inputLen && inputLen > outputLen) {
+    if (inputLen > outputLen) {
         return 0;
     }
+
     for(uint8_t i = 0; i < inputLen; i++) {
         if(input[i] > 0x1F) {
             return 0;

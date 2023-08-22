@@ -25,8 +25,6 @@ static parser_error_t parse_reclaim(parser_context_t *ctx, tx_command_legacy_tok
 
     uint64_t tmp64 = 0;
 
-    GET_KEY_AND_VARUINT(ctx, tmp64);
-
     // Read amount
     GET_KEY_AND_VARUINT(ctx, tmp64);
     transfer->amount = tmp64;
@@ -37,8 +35,6 @@ static parser_error_t parse_reclaim(parser_context_t *ctx, tx_command_legacy_tok
 static parser_error_t parse_register_keys(parser_context_t *ctx, tx_command_legacy_register_keys_t *transfer) {
 
     uint64_t tmp64 = 0;
-
-    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     // Read blskey
     GET_KEY_AND_VARUINT(ctx, tmp64);

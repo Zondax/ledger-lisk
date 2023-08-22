@@ -36,19 +36,18 @@
 
 #include "app_mode.h"
 
+const char TAG_INIT[7] = "LSK_TX_";
+
 #define PRINT_STANDARD_FIELDS(denom1, f1, f1_len, denom2, f2, f2_len) { \
     *pageCount = 1; \
-    char buf[DATA_MAX_LENGTH] = {0}; \
     switch (displayIdx) { \
         case INTEROP_MAIN_REG_OWNCHAIN_ID_TYPE: \
             snprintf(outKey, outKeyLen, denom1); \
-            array_to_hexstr(buf, sizeof(buf), f1, f1_len); \
-            pageString(outVal, outValLen, (const char*) &buf, pageIdx, pageCount); \
+            pageStringHex(outVal, outValLen, (const char*) f1, f1_len, pageIdx, pageCount); \
             return parser_ok; \
         case INTEROP_MAIN_REG_OWNNAME_TYPE: \
-            MEMCPY(buf, f2, f2_len); \
             snprintf(outKey, outKeyLen, denom2); \
-            pageString(outVal, outValLen, buf, pageIdx, pageCount); \
+            pageStringExt(outVal, outValLen, f2, f2_len, pageIdx, pageCount); \
             return parser_ok; \
         default: \
             break;}}
@@ -72,10 +71,13 @@ parser_error_t parser_init_context(parser_context_t *ctx,
 }
 
 parser_error_t parser_get_tag_chain(parser_context_t *ctx) {
-    if (MEMCMP(ctx->buffer, TAG_INIT, strlen(TAG_INIT)) != 0) {
+    if (ctx->bufferLen < sizeof(TAG_INIT)) {
+        return parser_unexpected_buffer_end;
+    }
+    if (MEMCMP(ctx->buffer, TAG_INIT, sizeof(TAG_INIT)) != 0) {
         return parser_unexpected_tag_init;
     }
-    ctx->offset += strlen(TAG_INIT);
+    ctx->offset += sizeof(TAG_INIT);
 
     if(ctx->offset >= ctx->bufferLen) {
         return parser_unexpected_tag_init;
@@ -138,6 +140,7 @@ parser_error_t parser_getTxNumItems(__Z_UNUSED const parser_context_t *ctx, uint
     return parser_ok;
 }
 
+// Get displayIdx item from context (ctx) and write the content in outKey and outVal
 parser_error_t parser_getItem(const parser_context_t *ctx,
                               uint8_t displayIdx,
                               char *outKey, uint16_t outKeyLen,
@@ -225,7 +228,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
                     break;
                 case TX_COMMAND_ID_MAINCHAIN_REG:
                     PRINT_STANDARD_FIELDS("OwnChainID", ctx->tx_obj->tx_command._interop_mainchain_register.ownChainId, OWNCHAIN_ID_LENGTH,
-                                          "OwnName", ctx->tx_obj->tx_command._interop_mainchain_register.ownName,
+                                          "OwnName", (const char*)ctx->tx_obj->tx_command._interop_mainchain_register.ownName,
                                           ctx->tx_obj->tx_command._interop_mainchain_register.ownNameLen);
                     break;
                 case TX_COMMAND_ID_MSG_RECOVERY:
@@ -238,7 +241,7 @@ parser_error_t parser_getItem(const parser_context_t *ctx,
                     break;
                 case TX_COMMAND_ID_STATE_RECOVERY:
                     PRINT_STANDARD_FIELDS("ChainID", ctx->tx_obj->tx_command._interop_recover_state.chainID, OWNCHAIN_ID_LENGTH,
-                                          "Module", ctx->tx_obj->tx_command._interop_recover_state.module,
+                                          "Module", (const char*) ctx->tx_obj->tx_command._interop_recover_state.module,
                                           ctx->tx_obj->tx_command._interop_recover_state.moduleLen);
                     break;
                 case TX_COMMAND_ID_SIDECHAIN_REG:

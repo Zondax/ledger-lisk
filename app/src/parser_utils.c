@@ -33,7 +33,7 @@ static const char MSB = 0x80;
 parser_error_t _encodeAddressHash(uint8_t *buffer, uint16_t bufferLen, const uint8_t *pubkeyHash) {
 
     // Add HRP
-    const uint8_t hrpLen = strlen(COIN_HRP);
+    const uint8_t hrpLen = strnlen(COIN_HRP, bufferLen);
     MEMCPY(buffer, COIN_HRP, hrpLen);
 
     // Get address + checksum
@@ -68,7 +68,7 @@ parser_error_t _readUnsignedVarint(parser_context_t *ctx, uint64_t* output) {
 
     CHECK_ERROR(_readBytes(ctx, (uint8_t*)&tmpByte, 1))
 
-    while (tmpByte & MSB) {
+    while ((tmpByte & MSB) && (bits < 63)) {
         *output += ((tmpByte & 0x7F) << bits);
         bits += 7;
 
@@ -80,28 +80,28 @@ parser_error_t _readUnsignedVarint(parser_context_t *ctx, uint64_t* output) {
 }
 
 parser_error_t _readSignedVarint(parser_context_t *ctx, int64_t* result) {
-
     int bits = 0;
     uint64_t tmpByte = 0;
-    uint64_t output = 0;
+    int64_t output = 0;
 
     CHECK_ERROR(_readBytes(ctx, (uint8_t*)&tmpByte, 1))
 
-    while (tmpByte & MSB) {
-        output += ((tmpByte & 0x7F) << bits);
+    while ((tmpByte & MSB) && (bits < 63)) {
+        output |= ((tmpByte & 0x7F) << bits);
         bits += 7;
 
         CHECK_ERROR(_readBytes(ctx, (uint8_t*)&tmpByte, 1))
     }
-    output += ((tmpByte & 0x7F) << bits);
+    output |= ((tmpByte & 0x7F) << bits);
 
-    *result = (int64_t) output;
-
-    if(*result % 2 == 0) {
-        *result = *result / 2;
+    // Handle negative numbers
+    if (output & 1) {
+        output = -((output >> 1) + 1);
     } else {
-        *result = -(*result + 1) / 2;
+        output >>= 1;
     }
+
+    *result = output;
 
     return parser_ok;
 }

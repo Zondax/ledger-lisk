@@ -25,7 +25,7 @@ extern "C" {
 #include <sigutils.h>
 #include "zxerror.h"
 
-#define LISK_HDPATH_LEN 3
+#define LISK_HDPATH_LEN 3u
 
 typedef struct hdpath {
     uint32_t path[LISK_HDPATH_LEN];

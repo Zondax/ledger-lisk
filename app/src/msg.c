@@ -32,7 +32,7 @@ const char *msg_parse() {
     if (data == NULL || dataLen == 0) {
         return parser_getErrorDescription(parser_no_data);
     }
-    if (MEMCMP(data, TAG_INIT, strlen(TAG_INIT)) == 0) {
+    if (MEMCMP(data, TAG_INIT, sizeof(TAG_INIT)) == 0) {
         return parser_getErrorDescription(parser_unexpected_tag_init);
     }
     return NULL;
@@ -66,13 +66,11 @@ zxerr_t msg_getItem(int8_t displayIdx,
     uint8_t tmp_hash[32] = {0};
     crypto_hash(message, messageLength, tmp_hash, sizeof(tmp_hash));
 
-    switch (displayIdx) {
-        case 0: {
-            snprintf(outKey, outKeyLen, "Msg sign");
-            pageStringHex(outVal, outValLen, (const char*)tmp_hash, sizeof(tmp_hash), pageIdx, pageCount);
-            return zxerr_ok;
-        }
-        default:
-            return zxerr_no_data;
+    if (displayIdx == 0) {
+        snprintf(outKey, outKeyLen, "Msg sign");
+        pageStringHex(outVal, outValLen, (const char*)tmp_hash, sizeof(tmp_hash), pageIdx, pageCount);
+        return zxerr_ok;
     }
+
+    return zxerr_no_data;
 }
