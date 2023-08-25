@@ -17,7 +17,8 @@
 #include "parser_print_items.h"
 
 #include "coin.h"
-#include "parser_utils.c"
+#include "zxformat.h"
+#include "parser_utils.h"
 #include "txn_token_module.h"
 
 static parser_error_t print_module(uint32_t module_id, char *outKey,
@@ -53,12 +54,13 @@ static parser_error_t print_module(uint32_t module_id, char *outKey,
   return parser_ok;
 }
 
-static parser_error_t print_command_id(uint32_t module_id, uint32_t command_id,
+// Print Command ID depending on module_id and command_id inputs
+static parser_error_t print_command_id(const uint32_t module_id, const uint32_t command_id,
                                        char *outKey, uint16_t outKeyLen,
-                                       char *outVal, uint16_t outValLen,
-                                       uint8_t *pageCount) {
-  *pageCount = 1;
+                                       char *outVal, uint16_t outValLen) {
+
   snprintf(outKey, outKeyLen, "Command");
+
   switch (module_id) {
     case TX_MODULE_ID_TOKEN:
       switch (command_id) {
@@ -168,7 +170,7 @@ parser_error_t print_common_items(const parser_context_t *ctx,
 
         case 1:
             return print_command_id(ctx->tx_obj->module_id, ctx->tx_obj->command_id,
-                              outKey, outKeyLen, outVal, outValLen, pageCount);
+                              outKey, outKeyLen, outVal, outValLen);
 
         case 2:
             snprintf(outKey, outKeyLen, "Fee");

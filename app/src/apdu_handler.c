@@ -32,11 +32,6 @@
 #include "coin.h"
 #include "zxmacros.h"
 
-#define CHECK_PIN_VALIDATED() \
-if( os_global_pin_is_validated() != BOLOS_UX_OK ) { \
-    THROW(APDU_CODE_COMMAND_NOT_ALLOWED); \
-}
-
 static bool tx_initialized = false;
 
 void extractHDPath(uint32_t rx, uint32_t offset) {
@@ -95,10 +90,8 @@ __Z_INLINE bool process_chunk(__Z_UNUSED volatile uint32_t *tx, uint32_t rx) {
             added = tx_append(&(G_io_apdu_buffer[OFFSET_DATA]), rx - OFFSET_DATA);
             tx_initialized = false;
             if (added != rx - OFFSET_DATA) {
-                tx_initialized = false;
                 THROW(APDU_CODE_OUTPUT_BUFFER_TOO_SMALL);
             }
-            tx_initialized = false;
             return true;
     }
 
@@ -109,7 +102,7 @@ __Z_INLINE void handleGetAddr(volatile uint32_t *flags, volatile uint32_t *tx, u
     extractHDPath(rx, OFFSET_DATA);
 
     const uint8_t requireConfirmation = G_io_apdu_buffer[OFFSET_P1];
-    zxerr_t zxerr = app_fill_address();
+    const zxerr_t zxerr = app_fill_address();
     if(zxerr != zxerr_ok){
         *tx = 0;
         THROW(APDU_CODE_DATA_INVALID);
@@ -133,7 +126,7 @@ __Z_INLINE void handleSign(volatile uint32_t *flags, volatile uint32_t *tx, uint
     const char *error_msg = tx_parse();
     CHECK_APP_CANARY()
     if (error_msg != NULL) {
-        int error_msg_length = strlen(error_msg);
+        const int error_msg_length = strnlen(error_msg, sizeof(G_io_apdu_buffer));
         memcpy(G_io_apdu_buffer, error_msg, error_msg_length);
         *tx += (error_msg_length);
         THROW(APDU_CODE_DATA_INVALID);
@@ -151,7 +144,7 @@ __Z_INLINE void handleSignMessage(volatile uint32_t *flags, volatile uint32_t *t
     }
     const char *error_msg = msg_parse();
     if (error_msg != NULL) {
-        int error_msg_length = strlen(error_msg);
+        const int error_msg_length = strnlen(error_msg, sizeof(G_io_apdu_buffer));
         memcpy(G_io_apdu_buffer, error_msg, error_msg_length);
         *tx += (error_msg_length);
         THROW(APDU_CODE_DATA_INVALID);
@@ -179,7 +172,8 @@ __Z_INLINE void handle_getversion(__Z_UNUSED volatile uint32_t *flags, volatile 
     G_io_apdu_buffer[5] = (LEDGER_PATCH_VERSION >> 8) & 0xFF;
     G_io_apdu_buffer[6] = (LEDGER_PATCH_VERSION >> 0) & 0xFF;
 
-    G_io_apdu_buffer[7] = !IS_UX_ALLOWED;
+    // SDK won't reply if device is blocked
+    G_io_apdu_buffer[7] = 0;
 
     G_io_apdu_buffer[8] = (TARGET_ID >> 24) & 0xFF;
     G_io_apdu_buffer[9] = (TARGET_ID >> 16) & 0xFF;
@@ -197,7 +191,7 @@ void handleTest(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
 #endif
 
 void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
-    uint16_t sw = 0;
+    volatile uint16_t sw = 0;
 
     BEGIN_TRY
     {
@@ -262,7 +256,7 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     break;
             }
             G_io_apdu_buffer[*tx] = sw >> 8;
-            G_io_apdu_buffer[*tx + 1] = sw;
+            G_io_apdu_buffer[*tx + 1] = sw & 0xFF;
             *tx += 2;
         }
         FINALLY

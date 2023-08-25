@@ -24,13 +24,13 @@
 extern "C" {
 #endif
 
-#define PUBKEY_HASH_LEN         32
-#define CHECKSUMMED_ADDRESS_LEN 38
-#define PUBKEY_HASH_160BITS     20
+#define PUBKEY_HASH_LEN         32u
+#define CHECKSUMMED_ADDRESS_LEN 38u
+#define PUBKEY_HASH_160BITS     20u
 
-#define ADDRESS_LEN             32
-#define CHECKSUM_LEN             6
-#define HASH_5BITS               5
+#define ADDRESS_LEN             32u
+#define CHECKSUM_LEN             6u
+#define HASH_5BITS               5u
 
 parser_error_t crypto_hash(const uint8_t * input, uint8_t inputLen, uint8_t* output, uint8_t outputLen);
 zxerr_t crypto_hashPubkey(const uint8_t * pubKey, uint8_t* buffer, uint8_t bufferLen);

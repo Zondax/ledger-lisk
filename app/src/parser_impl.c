@@ -25,8 +25,8 @@
 
 static uint8_t tx_num_items;
 
-#define MAX_PARAM_SIZE 12
-#define MAX_ITEM_ARRAY 128
+#define MAX_PARAM_SIZE 12u
+#define MAX_ITEM_ARRAY 128u
 static uint8_t itemArray[MAX_ITEM_ARRAY] = {0};
 static uint8_t itemIndex = 0;
 
@@ -72,17 +72,19 @@ static parser_error_t find_id(parser_tx_t *tx_obj,uint8_t* module, uint8_t modul
 
     for (i = 0; i < array_length(module_substitutions); i++) {
         const char *substStr = module_substitutions[i].name;
-        if (strlen(substStr) == module_length && !MEMCMP(substStr, module, module_length)) {
+        const uint32_t subsStrLen = sizeof(module_substitutions[i].name);
+        if (strnlen(substStr, subsStrLen) == module_length && !MEMCMP(substStr, module, module_length)) {
             tx_obj->module_id = module_substitutions[i].id;
             break;
         }
     }
-    
+
     if(i == array_length(module_substitutions)) return parser_unexpected_value;
 
     for (i = 0; i < array_length(command_substitutions); i++) {
         const char *substStr = command_substitutions[i].name;
-        if (strlen(substStr) == command_length && !MEMCMP(substStr, command, command_length)) {
+        const uint32_t subsStrLen = sizeof(module_substitutions[i].name);
+        if (strnlen(substStr, subsStrLen) == command_length && !MEMCMP(substStr, command, command_length)) {
             tx_obj->command_id = command_substitutions[i].id;
             break;
         }
@@ -108,8 +110,8 @@ parser_error_t initializeItemArray() {
 
 parser_error_t display_item(uint8_t type, uint8_t len) {
     for(uint8_t i = 0; i < len; i++) {
-        CHECK_ERROR(addItem(type))          
-        tx_num_items++;                   
+        CHECK_ERROR(addItem(type))
+        tx_num_items++;
     }
     return parser_ok;
 }
@@ -175,6 +177,9 @@ static parser_error_t parse_common(parser_context_t *ctx, parser_tx_t *tx_obj) {
     }
 
     CHECK_ERROR(_readBytes(ctx, tx_obj->senderPublicKey, ENCODED_PUB_KEY))
+
+    // Unwrap params section before reading actual parameters
+    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     return parser_ok;
 }
@@ -271,7 +276,7 @@ uint8_t _getNumItems(const parser_context_t *ctx) {
 
 parser_error_t _read(parser_context_t *ctx, parser_tx_t *tx_obj) {
     CHECK_ERROR(parse_common(ctx, tx_obj))
-    CHECK_ERROR(initializeItemArray()) 
+    CHECK_ERROR(initializeItemArray())
     switch (tx_obj->module_id) {
         case TX_MODULE_ID_TOKEN:
             CHECK_ERROR(parse_token_module(ctx, tx_obj))

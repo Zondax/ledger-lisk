@@ -45,12 +45,10 @@ zxerr_t crypto_hashPubkey(const uint8_t * pubKey, uint8_t* buffer, uint8_t buffe
     unsigned char hash[32] = {0};
 
 #if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX) || defined(TARGET_STAX)
-    cx_sha256_t ctx;
-
+    cx_sha256_t ctx = {0};
     if(bufferLen < PUBKEY_HASH_LEN) {
         return zxerr_buffer_too_small;
     }
-    memset(&ctx, 0, sizeof(ctx));
     cx_sha256_init(&ctx);
     cx_hash_no_throw(&ctx.header, CX_LAST, pubKey, PK_LEN_25519, hash, sizeof(hash));
 #else
@@ -72,8 +70,7 @@ parser_error_t crypto_hash(const uint8_t * input, uint8_t inputLen, uint8_t* out
     }
 
 #if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX) || defined(TARGET_STAX)
-    cx_sha256_t ctx;
-    memset(&ctx, 0, sizeof(ctx));
+    cx_sha256_t ctx = {0};
     cx_sha256_init(&ctx);
     cx_hash_no_throw(&ctx.header, CX_LAST, input, inputLen, hash, sizeof(hash));
 #else
@@ -142,7 +139,7 @@ zxerr_t crypto_checksum(const uint8_t * address_5bits, uint8_t* output, uint8_t 
 zxerr_t crypto_encodePubkey(uint8_t *buffer, uint16_t bufferLen, const uint8_t *pubkey, uint8_t *addrLen) {
     // Generate address (https://github.com/LiskHQ/lips/blob/main/proposals/lip-0018.md)
     // Add HRP
-    const uint8_t hrpLen = strlen(COIN_HRP);
+    const uint8_t hrpLen = strnlen(COIN_HRP, bufferLen);
     MEMCPY(buffer, COIN_HRP, hrpLen);
     // Get Hash(pubKey)
     uint8_t pubkeyHash[PUBKEY_HASH_LEN] = {0};

@@ -19,18 +19,18 @@
 extern "C" {
 #endif
 
-#define CLA                             0x60
+#define CLA                             0x60u
 
 #define HDPATH_LEN_DEFAULT   5
-#define HDPATH_0_DEFAULT     (0x80000000u | 0x2c)   //44
-#define HDPATH_1_DEFAULT     (0x80000000u | 0x86)   //134
-#define HDPATH_1_TESTNET     (0x80000000u | 0x1)    //1
+#define HDPATH_0_DEFAULT     (0x80000000u | 0x2cu)   //44
+#define HDPATH_1_DEFAULT     (0x80000000u | 0x86u)   //134
+#define HDPATH_1_TESTNET     (0x80000000u | 0x1u)    //1
 
 #define HDPATH_2_DEFAULT     (0x80000000u | 0u)
 #define HDPATH_3_DEFAULT     (0u)
 #define HDPATH_4_DEFAULT     (0u)
 
-#define INS_SIGN_MSG                    0x03
+#define INS_SIGN_MSG                    0x03u
 
 #define SECP256K1_PK_LEN            65u
 
@@ -44,11 +44,10 @@ extern "C" {
 #define MAX_SIGN_SIZE 256u
 #define BLAKE2B_DIGEST_SIZE 32u
 
-#define COIN_AMOUNT_DECIMAL_PLACES 8
+#define COIN_AMOUNT_DECIMAL_PLACES 8u
 #define COIN_TICKER "LSK "
 #define UNSTAKE_COIN_TICKER "LSK -"
 #define COIN_HRP "lsk"
-#define TAG_INIT "LSK_TX_"
 
 #define MENU_MAIN_APP_LINE1 "Lisk"
 #define MENU_MAIN_APP_LINE2 "Ready"

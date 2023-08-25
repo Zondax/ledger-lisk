@@ -39,11 +39,10 @@
             break;}}
 
 static parser_error_t parse_chainCCUpdate(parser_context_t *ctx, tx_command_interop_chain_cc_update_t *transfer) {
-
+    if (ctx == NULL || transfer == NULL) {
+        return parser_unexpected_value;
+    }
     uint64_t tmp64 = 0;
-
-    // commands is serialized as bytes, varint first for the size
-    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     //Read sending chain ID
     GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -61,11 +60,10 @@ static parser_error_t parse_chainCCUpdate(parser_context_t *ctx, tx_command_inte
 }
 
 static parser_error_t parse_mainchain_register(parser_context_t *ctx, tx_command_interop_mainchain_register_t *transfer) {
-
+    if (ctx == NULL || transfer == NULL) {
+        return parser_unexpected_value;
+    }
     uint64_t tmp64 = 0;
-
-    // commands is serialized as bytes, varint first for the size
-    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     //Read sending chain ID
     GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -92,11 +90,10 @@ static parser_error_t parse_mainchain_register(parser_context_t *ctx, tx_command
 }
 
 static parser_error_t parse_recover_msg(parser_context_t *ctx, tx_command_interop_recover_msg_t *transfer) {
-
+    if (ctx == NULL || transfer == NULL) {
+        return parser_unexpected_value;
+    }
     uint64_t tmp64 = 0;
-
-    // commands is serialized as bytes, varint first for the size
-    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     //Read sending chain ID
     GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -114,11 +111,10 @@ static parser_error_t parse_recover_msg(parser_context_t *ctx, tx_command_intero
 }
 
 static parser_error_t parse_recover_msg_init(parser_context_t *ctx, tx_command_interop_recover_msg_init_t *transfer) {
-
+    if (ctx == NULL || transfer == NULL) {
+        return parser_unexpected_value;
+    }
     uint64_t tmp64 = 0;
-
-    // commands is serialized as bytes, varint first for the size
-    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     //Read sending chain ID
     GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -136,12 +132,10 @@ static parser_error_t parse_recover_msg_init(parser_context_t *ctx, tx_command_i
 }
 
 static parser_error_t parse_sidechain_register(parser_context_t *ctx, tx_command_interop_sidechain_register_t *transfer) {
-
-
+    if (ctx == NULL || transfer == NULL) {
+        return parser_unexpected_value;
+    }
     uint64_t tmp64 = 0;
-
-    // commands is serialized as bytes, varint first for the size
-    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     //Read sending chain ID
     GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -168,11 +162,10 @@ static parser_error_t parse_sidechain_register(parser_context_t *ctx, tx_command
 }
 
 static parser_error_t parse_recover_state_init(parser_context_t *ctx, tx_command_interop_recover_state_init_t *transfer) {
-
+    if (ctx == NULL || transfer == NULL) {
+        return parser_unexpected_value;
+    }
     uint64_t tmp64 = 0;
-
-    // commands is serialized as bytes, varint first for the size
-    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     //Read sending chain ID
     GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -190,11 +183,10 @@ static parser_error_t parse_recover_state_init(parser_context_t *ctx, tx_command
 }
 
 static parser_error_t parse_recover_state(parser_context_t *ctx, tx_command_interop_recover_state_t *transfer) {
-
+    if (ctx == NULL || transfer == NULL) {
+        return parser_unexpected_value;
+    }
     uint64_t tmp64 = 0;
-
-    // commands is serialized as bytes, varint first for the size
-    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     //Read sending chain ID
     GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -221,6 +213,9 @@ static parser_error_t parse_recover_state(parser_context_t *ctx, tx_command_inte
 }
 
 parser_error_t parse_interop_module(parser_context_t *ctx, parser_tx_t *tx_obj) {
+    if (ctx == NULL || tx_obj == NULL) {
+        return parser_unexpected_value;
+    }
 
     switch (tx_obj->command_id) {
         case TX_COMMAND_ID_MAINCHAIN_CC_UPDATE:
@@ -258,12 +253,9 @@ parser_error_t print_module_interop_CCupdate(const parser_context_t *ctx,
                                   char *outVal, uint16_t outValLen,
                                   uint8_t pageIdx, uint8_t *pageCount) {
     *pageCount = 1;
-    char buf[DATA_MAX_LENGTH] = {0};
     if(displayIdx == 0) {
         snprintf(outKey, outKeyLen, "SendingChainID");
-        array_to_hexstr(buf, sizeof(buf), ctx->tx_obj->tx_command._interop_chain_cc_update.sendingChainID,SENDINGCHAIN_ID_LENGTH);
-        pageString(outVal, outValLen, (const char*) &buf, pageIdx, pageCount);
-
+        pageStringHex(outVal, outValLen, (const char*) ctx->tx_obj->tx_command._interop_chain_cc_update.sendingChainID, SENDINGCHAIN_ID_LENGTH, pageIdx, pageCount);
         return parser_ok;
     }
     return parser_display_idx_out_of_range;
@@ -275,18 +267,16 @@ parser_error_t print_module_sidechain_register(const parser_context_t *ctx,
                                   char *outVal, uint16_t outValLen,
                                   uint8_t pageIdx, uint8_t *pageCount) {
     *pageCount = 1;
-    char buf[DATA_MAX_LENGTH] = {0};
+    tx_command_interop_sidechain_register_t *sidechain_register = &ctx->tx_obj->tx_command._interop_sidechain_register;
 
     switch (displayIdx) {
         case INTEROP_SIDE_REG_NAME_TYPE:
-            MEMCPY(buf, ctx->tx_obj->tx_command._interop_sidechain_register.name, ctx->tx_obj->tx_command._interop_sidechain_register.nameLen);
             snprintf(outKey, outKeyLen, "Name");
-            pageString(outVal, outValLen, buf, pageIdx, pageCount);
+            pageStringExt(outVal, outValLen, (const char*) sidechain_register->name, sidechain_register->nameLen, pageIdx, pageCount);
             return parser_ok;
         case INTEROP_SIDE_REG_CHAIN_ID_TYPE:
             snprintf(outKey, outKeyLen, "ChainID");
-            array_to_hexstr(buf, sizeof(buf), ctx->tx_obj->tx_command._interop_sidechain_register.chainID,INTEROP_CHAINID_LENGTH);
-            pageString(outVal, outValLen, (const char*) &buf, pageIdx, pageCount);
+            pageStringHex(outVal, outValLen, (const char*) sidechain_register->chainID, INTEROP_CHAINID_LENGTH, pageIdx, pageCount);
             return parser_ok;
         default:
             break;

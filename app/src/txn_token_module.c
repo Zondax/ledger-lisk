@@ -24,9 +24,6 @@ static parser_error_t parse_transfer(parser_context_t *ctx, tx_command_token_tra
 
     uint64_t tmp64 = 0;
 
-    // skip
-    GET_KEY_AND_VARUINT(ctx, tmp64);
-
     // Read TOKENID
     GET_KEY_AND_VARUINT(ctx, tmp64);
     if (tmp64 != TOKEN_ID_LENGTH) {
@@ -60,8 +57,6 @@ static parser_error_t parse_transfer(parser_context_t *ctx, tx_command_token_tra
 
 static parser_error_t parse_crosschain_transfer(parser_context_t *ctx, tx_command_token_crosschain_transfer_t *transfer) {
     uint64_t tmp64 = 0;
-
-    GET_KEY_AND_VARUINT(ctx, tmp64);
 
     // Read TOKENID
     GET_KEY_AND_VARUINT(ctx, tmp64);
@@ -208,7 +203,6 @@ parser_error_t print_module_token_cross(const parser_context_t *ctx,
         }
 
         case TOKEN_CROSSCHAIN_RX_CHAIN_ID_TYPE: {
-            memset(buf, 0, sizeof(buf));
             array_to_hexstr((char*) &buf, sizeof(buf), ctx->tx_obj->tx_command._token_crosschain_transfer.receivingChainID, CHAIN_ID_LENGTH);
             snprintf(outKey, outKeyLen, "RxChainID");
             pageString(outVal, outValLen, (const char*) &buf, pageIdx, pageCount);
