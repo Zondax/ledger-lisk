@@ -31,21 +31,25 @@ $(info ************ TARGET_NAME  = [$(TARGET_NAME)])
 include $(CURDIR)/../deps/ledger-zxlib/makefiles/Makefile.app_testing
 
 ifndef COIN
-COIN=LSK
+# TODO: change the variant name when going to mainnet
+COIN=lisk_testnet
 endif
 
 include $(CURDIR)/Makefile.version
 
 $(info COIN  = [$(COIN)])
 
-ifeq ($(COIN),LSK)
+ifeq ($(COIN),lisk_testnet)
 # Main app configuration
 DEFINES += APP_STANDARD
 ifneq ($(TARGET_NAME),TARGET_NANOS)
 DEFINES += SUBSTRATE_PARSER_FULL
 endif
-APPNAME = "Lisk"
-APPPATH = "44'/134'" --path "44'/1'"
+# TODO: change the app name when going to mainnet
+APPNAME = "Lisk Testnet"
+# TODO: Uncomment the main path when going to mainnet
+#APPPATH = "44'/134'" --path "44'/1'"
+APPPATH = "44'/1'"
 
 else
 define error_message
@@ -94,7 +98,7 @@ dep/%.d: %.c Makefile
 
 .PHONY: listvariants
 listvariants:
-	@echo VARIANTS COIN LSK
+	@echo VARIANTS COIN lisk_testnet
 
 .PHONY: version
 version:
