@@ -18,14 +18,14 @@
   },
   "dependencies": {
     "@zondax/ledger-lisk": "../js",
-    "@zondax/zemu": "^0.44.0"
+    "@zondax/zemu": "^0.45.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "@typescript-eslint/parser": "^6.4.1",
     "blakejs": "^1.1.1",
-    "crypto-js": "4.1.1",
+    "crypto-js": "4.2.0",
     "ed25519-supercop": "^2.0.1",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^9.0.0",
