@@ -46,7 +46,7 @@ DEFINES += SUBSTRATE_PARSER_FULL
 endif
 
 APPNAME = "Lisk"
-APPPATH = "44'/134'" --path "44'/1'"
+APPPATH = "44'/134'"
 
 else
 define error_message
