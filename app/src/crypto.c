@@ -34,7 +34,7 @@ zxerr_t crypto_extractPublicKey(uint8_t *pubKey, uint16_t pubKeyLen) {
     zxerr_t err = zxerr_unknown;
     // Generate keys
     CATCH_CXERROR(os_derive_bip32_with_seed_no_throw(
-        HDW_NORMAL,
+        HDW_ED25519_SLIP10,
         CX_CURVE_Ed25519,
         hdPath.path,
         hdPath.pathLength,
@@ -71,7 +71,7 @@ zxerr_t crypto_sign(uint8_t *signature, uint16_t signatureMaxlen, const uint8_t 
     zxerr_t err = zxerr_unknown;
     // Generate keys
     CATCH_CXERROR(os_derive_bip32_with_seed_no_throw(
-        HDW_NORMAL,
+        HDW_ED25519_SLIP10,
         CX_CURVE_Ed25519,
         hdPath.path,
         hdPath.pathLength,
