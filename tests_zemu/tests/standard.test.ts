@@ -83,8 +83,8 @@ describe('Standard', function () {
       expect(response.return_code).toEqual(0x9000)
       expect(response.error_message).toEqual('No errors')
 
-      const expected_pk = 'bdc868bd29b8b1f4c19f0dd1d444aa649797f8aa3b255bf01e61ca462f059ce7'
-      const expected_address = 'lskdfud7huub5mp75rh966com9fhoa4jq9hesshbp'
+      const expected_pk = '17c3e7e6e4b35e20067150c70fad1423f12dc2b6796ebecfd97a2d7ce5d1292f'
+      const expected_address = 'lskgxy2g4jj4v96pvxkmhcefpfg5u7vn8s5du8y8x'
 
       expect(response.pubKey).toEqual(expected_pk)
       expect(response.address).toEqual(expected_address)
