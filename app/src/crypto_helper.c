@@ -19,7 +19,6 @@
 #include "lisk_base32.h"
 #include "zxmacros.h"
 
-
 #define SHA256_LENGTH 32
 
 #if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX) || defined(TARGET_STAX)
@@ -50,7 +49,7 @@ zxerr_t crypto_hashPubkey(const uint8_t * pubKey, uint8_t* buffer, uint8_t buffe
         return zxerr_buffer_too_small;
     }
     cx_sha256_init(&ctx);
-    cx_hash_no_throw(&ctx.header, CX_LAST, pubKey, PK_LEN_25519, hash, sizeof(hash));
+    CHECK_CX_OK(cx_hash_no_throw(&ctx.header, CX_LAST, pubKey, PK_LEN_25519, hash, sizeof(hash)));
 #else
     picohash_ctx_t ctx;
     picohash_init_sha256(&ctx);
@@ -72,7 +71,7 @@ parser_error_t crypto_hash(const uint8_t * input, uint8_t inputLen, uint8_t* out
 #if defined(TARGET_NANOS) || defined(TARGET_NANOS2) || defined(TARGET_NANOX) || defined(TARGET_STAX)
     cx_sha256_t ctx = {0};
     cx_sha256_init(&ctx);
-    cx_hash_no_throw(&ctx.header, CX_LAST, input, inputLen, hash, sizeof(hash));
+    CHECK_CX_PARSER_OK(cx_hash_no_throw(&ctx.header, CX_LAST, input, inputLen, hash, sizeof(hash)));
 #else
     picohash_ctx_t ctx;
     picohash_init_sha256(&ctx);
@@ -143,11 +142,11 @@ zxerr_t crypto_encodePubkey(uint8_t *buffer, uint16_t bufferLen, const uint8_t *
     MEMCPY(buffer, COIN_HRP, hrpLen);
     // Get Hash(pubKey)
     uint8_t pubkeyHash[PUBKEY_HASH_LEN] = {0};
-    CHECK_ZXERR(crypto_hashPubkey(pubkey, pubkeyHash, sizeof(pubkeyHash)))
+    CHECK_ZXERR(crypto_hashPubkey(pubkey, pubkeyHash, sizeof(pubkeyHash)));
     // Get address + checksum
     uint8_t tmpAddress[CHECKSUMMED_ADDRESS_LEN] = {0};
-    CHECK_ZXERR(crypto_split_string(pubkeyHash, PUBKEY_HASH_160BITS, tmpAddress, sizeof(tmpAddress)))
-    CHECK_ZXERR(crypto_checksum(tmpAddress, tmpAddress + ADDRESS_LEN, sizeof(tmpAddress)-ADDRESS_LEN))
+    CHECK_ZXERR(crypto_split_string(pubkeyHash, PUBKEY_HASH_160BITS, tmpAddress, sizeof(tmpAddress)));
+    CHECK_ZXERR(crypto_checksum(tmpAddress, tmpAddress + ADDRESS_LEN, sizeof(tmpAddress)-ADDRESS_LEN));
     // LiskBase32 encoding
     uint8_t addressLen = lisk_base32_encode(tmpAddress, ADDRESS_LEN + CHECKSUM_LEN, buffer + hrpLen, bufferLen - hrpLen);
 

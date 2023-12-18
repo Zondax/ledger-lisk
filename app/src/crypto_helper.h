@@ -24,6 +24,14 @@
 extern "C" {
 #endif
 
+#define CHECK_CX_PARSER_OK(CALL)         \
+    do {                          \
+        cx_err_t __cx_err = CALL; \
+        if (__cx_err != CX_OK) {  \
+            return parser_unexpected_error; \
+        }                         \
+    } while (0)
+
 #define PUBKEY_HASH_LEN         32u
 #define CHECKSUMMED_ADDRESS_LEN 38u
 #define PUBKEY_HASH_160BITS     20u

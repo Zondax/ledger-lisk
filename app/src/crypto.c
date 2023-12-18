@@ -41,11 +41,11 @@ zxerr_t crypto_extractPublicKey(uint8_t *pubKey, uint16_t pubKeyLen) {
         privateKeyData,
         NULL,
         NULL,
-        0))
+        0));
 
-    CATCH_CXERROR(cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519, privateKeyData, 32, &cx_privateKey))
-    CATCH_CXERROR(cx_ecfp_init_public_key_no_throw(CX_CURVE_Ed25519, NULL, 0, &cx_publicKey))
-    CATCH_CXERROR(cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, &cx_publicKey, &cx_privateKey, 1))
+    CATCH_CXERROR(cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519, privateKeyData, 32, &cx_privateKey));
+    CATCH_CXERROR(cx_ecfp_init_public_key_no_throw(CX_CURVE_Ed25519, NULL, 0, &cx_publicKey));
+    CATCH_CXERROR(cx_ecfp_generate_pair_no_throw(CX_CURVE_Ed25519, &cx_publicKey, &cx_privateKey, 1));
     for (unsigned int i = 0; i < PK_LEN_25519; i++) {
         pubKey[i] = cx_publicKey.W[64 - i];
     }
@@ -78,9 +78,9 @@ zxerr_t crypto_sign(uint8_t *signature, uint16_t signatureMaxlen, const uint8_t 
         privateKeyData,
         NULL,
         NULL,
-        0))
+        0));
 
-    CATCH_CXERROR(cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519, privateKeyData, SCALAR_LEN_ED25519, &cx_privateKey))
+    CATCH_CXERROR(cx_ecfp_init_private_key_no_throw(CX_CURVE_Ed25519, privateKeyData, SCALAR_LEN_ED25519, &cx_privateKey));
 
     // Sign
     CATCH_CXERROR(cx_eddsa_sign_no_throw(
@@ -90,7 +90,7 @@ zxerr_t crypto_sign(uint8_t *signature, uint16_t signatureMaxlen, const uint8_t 
         messageLen,
         signature,
         signatureMaxlen
-    ))
+    ));
     err = zxerr_ok;
 
 catch_cx_error:
@@ -107,10 +107,10 @@ zxerr_t crypto_fillAddress(uint8_t *buffer, uint16_t bufferLen, uint16_t *respon
     }
 
     MEMZERO(buffer, bufferLen);
-    CHECK_ZXERR(crypto_extractPublicKey(buffer, bufferLen))
+    CHECK_ZXERR(crypto_extractPublicKey(buffer, bufferLen));
 
     uint8_t addrLen = 0;
-    CHECK_ZXERR(crypto_encodePubkey(buffer + PK_LEN_25519, bufferLen - PK_LEN_25519, buffer, &addrLen))
+    CHECK_ZXERR(crypto_encodePubkey(buffer + PK_LEN_25519, bufferLen - PK_LEN_25519, buffer, &addrLen));
 
     if (addrLen != LISK32_ADDRESS_LEN) {
         MEMZERO(buffer, bufferLen);
