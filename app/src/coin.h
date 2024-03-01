@@ -31,6 +31,7 @@ extern "C" {
 #define HDPATH_4_DEFAULT     (0u)
 
 #define INS_SIGN_MSG                    0x03u
+#define INS_CLAIM_MSG                   0x04u
 
 #define SECP256K1_PK_LEN            65u
 
@@ -43,6 +44,8 @@ extern "C" {
 
 #define MAX_SIGN_SIZE 256u
 #define BLAKE2B_DIGEST_SIZE 32u
+
+#define CLAIM_MSG_SUFIX 9
 
 #define COIN_AMOUNT_DECIMAL_PLACES 8u
 #define COIN_TICKER "LSK "

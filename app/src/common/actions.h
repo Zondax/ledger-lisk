@@ -26,6 +26,7 @@
 #include "lisk_base32.h"
 
 extern uint16_t action_addrResponseLen;
+extern bool sign_claim_message;
 
 __Z_INLINE zxerr_t app_fill_address() {
     // Put data directly in the apdu buffer
@@ -45,10 +46,10 @@ __Z_INLINE void app_sign() {
     const uint8_t *message = tx_get_buffer();
     const uint16_t messageLength = tx_get_buffer_length();
 
-    uint8_t msgHash[CX_SHA256_SIZE] = {0};
-    cx_hash_sha256(message, messageLength, msgHash, CX_SHA256_SIZE);
-
-    const zxerr_t err_sign= crypto_sign(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE - 3, (const uint8_t*)&msgHash, CX_SHA256_SIZE);
+    uint8_t msgHash[CX_SHA256_SIZE + CLAIM_MSG_SUFIX] = {0};
+    uint16_t hashLength = 0;
+    crypto_msg_hash(message, messageLength, msgHash, sizeof(msgHash), &hashLength, sign_claim_message);
+    const zxerr_t err_sign= crypto_sign(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE - 3, (const uint8_t*)&msgHash, hashLength);
 
     if (err_sign != zxerr_ok) {
         set_code(G_io_apdu_buffer, 0, APDU_CODE_SIGN_VERIFY_ERROR);

@@ -32,6 +32,11 @@ zxerr_t msg_getItem(int8_t displayIdx,
                      char *outValue, uint16_t outValueLen,
                      uint8_t pageIdx, uint8_t *pageCount);
 
+zxerr_t claim_getItem(int8_t displayIdx,
+                     char *outKey, uint16_t outKeyLen,
+                     char *outVal, uint16_t outValLen,
+                     uint8_t pageIdx, uint8_t *pageCount);
+
 #ifdef __cplusplus
 }
 #endif

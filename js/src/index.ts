@@ -286,6 +286,10 @@ export class LiskApp {
   async signMessage(path: string, message: Buffer) {
     return await this.signImpl(path, message, INS.SIGN_MSG);
   }
+
+  async claimMessage(path: string, message: Buffer) {
+    return await this.signImpl(path, message, INS.CLAIM_MSG);
+  }
 }
 
 /**
