@@ -155,6 +155,25 @@ __Z_INLINE void handleSignMessage(volatile uint32_t *flags, volatile uint32_t *t
     *flags |= IO_ASYNCH_REPLY;
 }
 
+__Z_INLINE void handleClaimMessage(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
+    zemu_log("handleClaimMessage\n");
+    if (!process_chunk(tx, rx)) {
+        THROW(APDU_CODE_OK);
+    }
+    const char *error_msg = msg_parse();
+    if (error_msg != NULL) {
+        const int error_msg_length = strnlen(error_msg, sizeof(G_io_apdu_buffer));
+        memcpy(G_io_apdu_buffer, error_msg, error_msg_length);
+        *tx += (error_msg_length);
+        THROW(APDU_CODE_DATA_INVALID);
+    }
+
+    sign_claim_message = true;
+    view_review_init(claim_getItem, msg_getNumItems, app_sign);
+    view_review_show(REVIEW_TXN);
+    *flags |= IO_ASYNCH_REPLY;
+}
+
 __Z_INLINE void handle_getversion(__Z_UNUSED volatile uint32_t *flags, volatile uint32_t *tx)
 {
     G_io_apdu_buffer[0] = 0;
@@ -192,7 +211,7 @@ void handleTest(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
 
 void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
     volatile uint16_t sw = 0;
-
+    sign_claim_message = false;
     BEGIN_TRY
     {
         TRY
@@ -228,6 +247,13 @@ void handleApdu(volatile uint32_t *flags, volatile uint32_t *tx, uint32_t rx) {
                     handleSignMessage(flags, tx, rx);
                     break;
                 }
+
+                case INS_CLAIM_MSG: {
+                    CHECK_PIN_VALIDATED()
+                    handleClaimMessage(flags, tx, rx);
+                    break;
+                }
+
 
 #if defined(APP_TESTING)
                     case INS_TEST: {

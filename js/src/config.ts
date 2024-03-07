@@ -19,5 +19,6 @@ export const enum INS {
   GET_ADDR_PUBKEY = 0x01,
   SIGN_TXN = 0x02,
   SIGN_MSG = 0x03,
+  CLAIM_MSG = 0x04,
 }
 export const PKLEN = 32;

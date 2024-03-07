@@ -74,3 +74,35 @@ zxerr_t msg_getItem(int8_t displayIdx,
 
     return zxerr_no_data;
 }
+
+zxerr_t claim_getItem(int8_t displayIdx,
+                     char *outKey, uint16_t outKeyLen,
+                     char *outVal, uint16_t outValLen,
+                     uint8_t pageIdx, uint8_t *pageCount) {
+    ZEMU_LOGF(200, "[claim_getItem] %d/%d\n", displayIdx, pageIdx)
+
+    MEMZERO(outKey, outKeyLen);
+    MEMZERO(outVal, outValLen);
+    snprintf(outKey, outKeyLen, "?");
+    snprintf(outVal, outValLen, " ");
+    *pageCount = 1;
+
+    const uint8_t *message = tx_get_buffer();
+    const uint16_t messageLength = tx_get_buffer_length();
+
+    if (messageLength == 0) {
+        return zxerr_no_data;
+    }
+
+    uint8_t tmp_hash[32 + CLAIM_MSG_SUFIX] = {0};
+    uint16_t hashLength = 0;
+    crypto_msg_hash(message, messageLength, tmp_hash, sizeof(tmp_hash), &hashLength, true);
+
+    if (displayIdx == 0) {
+        snprintf(outKey, outKeyLen, "Msg Claim");
+        pageStringHex(outVal, outValLen, (const char*)tmp_hash, hashLength, pageIdx, pageCount);
+        return zxerr_ok;
+    }
+
+    return zxerr_no_data;
+}

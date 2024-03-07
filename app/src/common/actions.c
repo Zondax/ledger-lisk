@@ -17,3 +17,4 @@
 #include "actions.h"
 
 uint16_t action_addrResponseLen;
+bool sign_claim_message;
