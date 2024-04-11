@@ -47,9 +47,14 @@ __Z_INLINE void app_sign() {
     const uint16_t messageLength = tx_get_buffer_length();
 
     uint8_t msgHash[CX_SHA256_SIZE + CLAIM_MSG_SUFIX] = {0};
-    uint16_t hashLength = 0;
-    crypto_msg_hash(message, messageLength, msgHash, sizeof(msgHash), &hashLength, sign_claim_message);
-    const zxerr_t err_sign= crypto_sign(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE - 3, (const uint8_t*)&msgHash, hashLength);
+
+    zxerr_t err_sign = zxerr_ok;
+    if(sign_claim_message) {
+        err_sign = crypto_sign(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE - 3, message, messageLength);
+    } else {
+        cx_hash_sha256(message, messageLength, msgHash, CX_SHA256_SIZE);
+        err_sign = crypto_sign(G_io_apdu_buffer, IO_APDU_BUFFER_SIZE - 3, (const uint8_t*)&msgHash, CX_SHA256_SIZE);
+    }
 
     if (err_sign != zxerr_ok) {
         set_code(G_io_apdu_buffer, 0, APDU_CODE_SIGN_VERIFY_ERROR);
