@@ -38,8 +38,6 @@ zxerr_t crypto_fillAddress(uint8_t *buffer, uint16_t bufferLen, uint16_t *respon
 
 zxerr_t crypto_sign(uint8_t *signature, uint16_t signatureMaxlen, const uint8_t *message, uint16_t messageLen);
 
-zxerr_t crypto_msg_hash(const uint8_t *message, uint16_t messageLength, uint8_t *msgHash, uint16_t msgHashLength, uint16_t *hashLength, bool sign_claim_message);
-
 #ifdef __cplusplus
 }
 #endif

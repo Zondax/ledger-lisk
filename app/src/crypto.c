@@ -120,21 +120,3 @@ zxerr_t crypto_fillAddress(uint8_t *buffer, uint16_t bufferLen, uint16_t *respon
     *responseLen = PK_LEN_25519 + LISK32_ADDRESS_LEN;
     return zxerr_ok;
 }
-
-zxerr_t crypto_msg_hash(const uint8_t *message, uint16_t messageLength, uint8_t *msgHash, uint16_t msgHashLength, uint16_t *hashLength, bool sign_claim_message) {
-    if (message == NULL || messageLength == 0 || msgHash == NULL || (msgHashLength < CX_SHA256_SIZE + CLAIM_MSG_SUFIX) || hashLength == NULL) {
-        return zxerr_no_data;
-    }
-
-    uint8_t hashsuffix[CLAIM_MSG_SUFIX] = {0};
-    if (sign_claim_message) {
-        CHECK_CX_OK(cx_keccak_256_hash(message, messageLength, msgHash));
-        MEMCPY(msgHash + CX_SHA256_SIZE, hashsuffix, sizeof(hashsuffix));
-        *hashLength = CX_SHA256_SIZE + 9;
-    } else {
-        cx_hash_sha256(message, messageLength, msgHash, CX_SHA256_SIZE);
-        *hashLength = CX_SHA256_SIZE;
-    }
-
-    return zxerr_ok;
-}
