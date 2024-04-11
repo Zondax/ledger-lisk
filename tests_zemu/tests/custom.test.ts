@@ -276,11 +276,7 @@ test.concurrent.each(models)('claim message', async function (m) {
     expect(signatureResponse.return_code).toEqual(0x9000)
     expect(signatureResponse.error_message).toEqual('No errors')
 
-    const sha3 = require('js-sha3')
-    const msgHash = sha3.keccak256(message)
-    const appendedBytes = Buffer.concat([Buffer.from(msgHash, 'hex'), Buffer.alloc(9)])
-
-    const valid = ed25519.verify(signatureResponse.signature, appendedBytes, pubKey)
+    const valid = ed25519.verify(signatureResponse.signature, message, pubKey)
     expect(valid).toEqual(true)
     console.log(valid)
   } finally {
