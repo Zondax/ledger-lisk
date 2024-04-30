@@ -52,10 +52,10 @@ extern "C" {
 #define UNSTAKE_COIN_TICKER "LSK -"
 #define COIN_HRP "lsk"
 
-#define MENU_MAIN_APP_LINE1 "Lisk"
+#define MENU_MAIN_APP_LINE1 "Lisk Legacy"
 #define MENU_MAIN_APP_LINE2 "Ready"
 #define MENU_MAIN_APP_LINE2_SECRET          "???"
-#define APPVERSION_LINE1 "Lisk"
+#define APPVERSION_LINE1 "Lisk Legacy"
 #define APPVERSION_LINE2 "v" APPVERSION
 
 #ifdef __cplusplus

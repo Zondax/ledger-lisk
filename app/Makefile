@@ -45,7 +45,7 @@ ifneq ($(TARGET_NAME),TARGET_NANOS)
 DEFINES += SUBSTRATE_PARSER_FULL
 endif
 
-APPNAME = "Lisk"
+APPNAME = "Lisk Legacy"
 APPPATH = "44'/134'"
 
 else
