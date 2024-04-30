@@ -31,14 +31,14 @@ $(info ************ TARGET_NAME  = [$(TARGET_NAME)])
 include $(CURDIR)/../deps/ledger-zxlib/makefiles/Makefile.app_testing
 
 ifndef COIN
-COIN=LSK
+COIN=LSK_LEGACY
 endif
 
 include $(CURDIR)/Makefile.version
 
 $(info COIN  = [$(COIN)])
 
-ifeq ($(COIN),LSK)
+ifeq ($(COIN),LSK_LEGACY)
 # Main app configuration
 DEFINES += APP_STANDARD
 ifneq ($(TARGET_NAME),TARGET_NANOS)
@@ -93,7 +93,7 @@ dep/%.d: %.c Makefile
 
 .PHONY: listvariants
 listvariants:
-	@echo VARIANTS COIN LSK
+	@echo VARIANTS COIN LSK_LEGACY
 
 .PHONY: version
 version:
